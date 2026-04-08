@@ -70,17 +70,21 @@
             flex-wrap: wrap;
             font-size: 12px;
             color: #000;
+            position: relative; 
         }
+        
         .menu-item {
             position: relative;
             padding: 4px 8px;
             cursor: pointer;
             user-select: none;
         }
+        
         .menu-item:hover, .menu-item.active {
             background: #000080;
             color: white;
         }
+        
         .dropdown {
             display: none;
             position: absolute;
@@ -91,33 +95,38 @@
             border-right-color: #888888;
             border-bottom-color: #888888;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            z-index: 2000;
-            min-width: 180px;
+            z-index: 9999;
+            min-width: 190px;
             color: var(--ora-text);
             padding: 2px;
         }
+        
         .menu-item.active .dropdown { display: block; }
         
         .dropdown-item {
-            padding: 4px 15px 4px 25px;
+            padding: 6px 15px 6px 20px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
+        
         .dropdown-item:hover {
             background: #0A246A;
             color: white;
         }
+        
         .dropdown-separator {
             height: 1px;
             background: #888888;
             border-bottom: 1px solid #FFFFFF;
             margin: 3px 2px;
         }
+        
         .shortcut { color: #666; font-size: 11px; padding-left: 15px;}
         .dropdown-item:hover .shortcut { color: #CCC; }
 
-        /* Toolbar (Simplified) */
+        /* Toolbar */
         .toolbar {
             background: var(--ora-bg);
             border-top: 1px solid #888888;
@@ -320,12 +329,12 @@
     <div class="popup">
         <div class="popup-header">
             <span>System Message</span>
-            <span style="cursor:pointer" onclick="document.getElementById('customAlert').style.display='none'">X</span>
+            <span style="cursor:pointer; padding:0 5px;" onclick="closeAlertMsg()">X</span>
         </div>
         <div class="popup-content">
             <h3 id="alertTitle">Error</h3>
             <p id="alertMsg">Please fill in all required fields.</p>
-            <button class="btn" id="closeAlertBtn">OK</button>
+            <button class="btn" onclick="closeAlertMsg()" style="width: 100%;">OK</button>
         </div>
     </div>
 </div>
@@ -335,7 +344,7 @@
     <div class="popup">
         <div class="popup-header">
             <span id="inputModalTitle">Query Mode</span>
-            <span style="cursor:pointer" onclick="closeInputModal()">X</span>
+            <span style="cursor:pointer; padding:0 5px;" onclick="closeInputModal()">X</span>
         </div>
         <div class="popup-content">
             <h3 id="inputModalHeading" style="color:var(--ora-header);">Enter Batch Number</h3>
@@ -343,8 +352,8 @@
             <input type="text" id="modalBatchInput" class="modal-input" list="batchList" placeholder="e.g. BATCH-01">
             <datalist id="batchList"></datalist>
             <div style="display:flex; justify-content:center; gap:10px;">
-                <button class="btn" id="modalOkBtn" style="background:#D4E6F1;">OK</button>
-                <button class="btn" onclick="closeInputModal()">Cancel</button>
+                <button class="btn" onclick="submitModal()" style="background:#D4E6F1; flex:1;">OK</button>
+                <button class="btn" onclick="closeInputModal()" style="flex:1;">Cancel</button>
             </div>
         </div>
     </div>
@@ -353,12 +362,12 @@
 <div class="app-window">
     <div class="title-bar">
         <span>☕</span>
-        <span>KMF Dispensing Helper - Java™</span>
+        <span>Oracle Applications - Java™</span>
     </div>
     
     <!-- INTERACTIVE MENU BAR -->
     <div class="menu-bar" id="menuBar">
-        <div class="menu-item" data-menu="file">
+        <div class="menu-item">
             <u>F</u>ile
             <div class="dropdown">
                 <div class="dropdown-item" onclick="window.location.reload()"><span>New / Clear Form</span><span class="shortcut">Ctrl+N</span></div>
@@ -366,11 +375,9 @@
                 <div class="dropdown-item" onclick="appSaveRecord()"><span>Save / Update Record</span><span class="shortcut">Ctrl+S</span></div>
                 <div class="dropdown-separator"></div>
                 <div class="dropdown-item" onclick="window.print()"><span>Print Output</span><span class="shortcut">Ctrl+P</span></div>
-                <div class="dropdown-separator"></div>
-                <div class="dropdown-item" onclick="window.close()"><span>Exit</span></div>
             </div>
         </div>
-        <div class="menu-item" data-menu="edit">
+        <div class="menu-item">
             <u>E</u>dit
             <div class="dropdown">
                 <div class="dropdown-item" onclick="openInputModal('search')"><span>Search / Load Batch</span><span class="shortcut">Ctrl+F</span></div>
@@ -378,21 +385,21 @@
                 <div class="dropdown-item" onclick="openInputModal('delete')"><span>Delete Batch Record</span><span class="shortcut">Del</span></div>
             </div>
         </div>
-        <div class="menu-item" data-menu="view">
+        <div class="menu-item">
             <u>V</u>iew
             <div class="dropdown">
-                <div class="dropdown-item" onclick="scrollToResult()"><span>View data Output </span></div>
+                <div class="dropdown-item" onclick="scrollToResult()"><span>View Master Log Output </span></div>
             </div>
         </div>
-        <div class="menu-item" data-menu="tools">
+        <div class="menu-item">
             <u>T</u>ools
             <div class="dropdown">
-                <div class="dropdown-item" onclick="document.getElementById('downloadBtn').click()"><span>Export as Image</span></div>
-                <div class="dropdown-item" onclick="document.getElementById('shareImageBtn').click()"><span>Share Image</span></div>
-                <div class="dropdown-item" onclick="document.getElementById('sendDataBtn').click()"><span>Send Text Data</span></div>
+                <div class="dropdown-item" onclick="triggerDownload()"><span>Export as Image</span></div>
+                <div class="dropdown-item" onclick="triggerShare()"><span>Share Image</span></div>
+                <div class="dropdown-item" onclick="triggerDataSend()"><span>Send Text Data</span></div>
             </div>
         </div>
-        <div class="menu-item" data-menu="help">
+        <div class="menu-item">
             <u>H</u>elp
             <div class="dropdown">
                 <div class="dropdown-item" onclick="showAboutInfo()"><span>About System</span></div>
@@ -401,13 +408,13 @@
     </div>
 
     <div class="toolbar">
-        <div class="toolbar-title"> Kashor Multiflex Facility </div>
+        <div class="toolbar-title">Kashor Multiflex Facility</div>
         <div class="toolbar-title" id="lockStatus" style="font-weight:normal; color:var(--ora-text);">✏️ Status: Editable</div>
     </div>
 
     <div class="content-area">
         <div class="ora-panel">
-            <div class="ora-panel-title">1.Product & Dispensing Details</div>
+            <div class="ora-panel-title">1. Product & Dispensing Details</div>
             <div class="grid-2">
                 <div class="input-group horizontal">
                     <label>Product Name</label>
@@ -418,21 +425,32 @@
                     <input type="text" id="batchNo" class="req-field batch-input">
                 </div>
                 <div class="input-group horizontal">
-                    <label>Product Area</label>
+                    <label>Dosage Form (Area)</label>
                     <select id="prodType" class="req-field">
-                        <option value="DPI">DPI(Dry Powder Inhaler)</option>
-                        <option value="MDI">MDI(Metered Dose Inhaler)</option>
+                        <option value="DPI">DPI (Dry Powder Inhaler)</option>
+                        <option value="MDI">MDI (Metered Dose Inhaler)</option>
                     </select>
                 </div>
                 <div class="input-group horizontal"><label>Booth Start</label><input type="datetime-local" id="boothStart" class="req-field"></div>
                 <div class="input-group horizontal"><label>Booth End</label><input type="datetime-local" id="boothEnd" class="req-field"></div>
-                <div class="input-group horizontal"><label>Dispense Start</label><input type="datetime-local" id="dispStart" class="req-field"></div>
-                <div class="input-group horizontal"><label>Dispense End</label><input type="datetime-local" id="dispEnd" class="req-field"></div>
+                
+                <div class="input-group horizontal"><label>Dispense 1 Start</label><input type="datetime-local" id="dispStart" class="req-field"></div>
+                <div class="input-group horizontal"><label>Dispense 1 End</label><input type="datetime-local" id="dispEnd" class="req-field"></div>
+                
+                <!-- Extra Fields for MDI (Hidden by default) -->
+                <div class="input-group horizontal mdi-field" style="display:none;"><label>Dispense 2 Start</label><input type="datetime-local" id="dispStart2"></div>
+                <div class="input-group horizontal mdi-field" style="display:none;"><label>Dispense 2 End</label><input type="datetime-local" id="dispEnd2"></div>
+
+                <!-- Manual Room Clean Start -->
+                <div class="input-group horizontal" style="grid-column: 1 / -1; background:#E8EEF7; padding:5px; border:1px solid #B6C5D4; margin-top:5px;">
+                    <label style="font-weight:bold; color:var(--ora-header);">Room Full Cleaning Start</label>
+                    <input type="datetime-local" id="roomCleanStart" class="req-field" style="max-width:300px;">
+                </div>
             </div>
         </div>
 
         <div class="ora-panel">
-            <div class="ora-panel-title">2.Dispensing Operation Personnel</div>
+            <div class="ora-panel-title">2. Dispensing Operation Personnel</div>
             <div class="grid-3">
                 <div class="input-group"><label>Booth Operator</label><input type="text" id="boothOperator" class="req-field"></div>
                 <div class="input-group"><label>Dispensing Operator</label><input type="text" id="dispOperator" class="req-field"></div>
@@ -454,11 +472,11 @@
         </div>
 
         <div class="ora-panel" id="resultArea">
-            <div class="ora-panel-title">Output: KMF Dispensing -Operation and Cleaning Details</div>
+            <div class="ora-panel-title">Output: KMF Dispensing - Operation and Cleaning Details</div>
             <div class="export-actions">
-                <button class="btn" id="downloadBtn">Export Image</button>
-                <button class="btn" id="shareImageBtn">Share Image</button>
-                <button class="btn" id="sendDataBtn">Send Data</button>
+                <button class="btn" onclick="triggerDownload()">Export Image</button>
+                <button class="btn" onclick="triggerShare()">Share Image</button>
+                <button class="btn" onclick="triggerDataSend()">Send Data</button>
                 <button class="btn" onclick="window.print()">Print</button>
             </div>
             
@@ -499,7 +517,7 @@
 
     <div class="status-bar">
         <span id="statusText">Ready</span>
-        <span>Oracle E-Business Suite helps manage your app’s data, users, and business operations in a centralized backend system. KMF_Dispensing_Manager</span>
+        <span>Oracle E-Business Suite | KMF_Dispensing_Manager</span>
     </div>
 </div>
 
@@ -524,10 +542,26 @@
     const scrollToResult = () => {
         const res = document.getElementById('resultArea');
         if(res.style.display === 'block') res.scrollIntoView({ behavior: 'smooth' });
-        else showMsg("Notice", "Please Select Batch number first or Create new ", "error");
+        else showMsg("Notice", "Please Select Batch number first or Create new.", "error");
     };
 
     // --- UI Interactions ---
+    // MDI Toggle Logic
+    document.getElementById('prodType').addEventListener('change', function() {
+        const isMDI = this.value === 'MDI';
+        document.querySelectorAll('.mdi-field').forEach(el => {
+            el.style.display = isMDI ? 'flex' : 'none';
+            const input = el.querySelector('input');
+            if (isMDI) {
+                input.classList.add('req-field');
+            } else {
+                input.classList.remove('req-field');
+                input.classList.remove('error-field');
+                input.value = '';
+            }
+        });
+    });
+
     // Menu System
     document.addEventListener('click', function(e) {
         document.querySelectorAll('.menu-item').forEach(item => {
@@ -540,18 +574,9 @@
 
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 's') {
-            e.preventDefault();
-            appSaveRecord();
-        }
-        if (e.ctrlKey && e.key.toLowerCase() === 'f') {
-            e.preventDefault();
-            openInputModal('search');
-        }
-        if (e.ctrlKey && e.key.toLowerCase() === 'n') {
-            e.preventDefault();
-            window.location.reload();
-        }
+        if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); appSaveRecord(); }
+        if (e.ctrlKey && e.key.toLowerCase() === 'f') { e.preventDefault(); openInputModal('search'); }
+        if (e.ctrlKey && e.key.toLowerCase() === 'n') { e.preventDefault(); window.location.reload(); }
     });
 
     // Custom Alert
@@ -559,17 +584,17 @@
     const alertTitle = document.getElementById('alertTitle');
     const alertMsg = document.getElementById('alertMsg');
     
-    const showMsg = (title, msg, type="error") => {
+    window.showMsg = (title, msg, type="error") => {
         alertTitle.innerText = title;
         alertMsg.innerHTML = msg;
         alertTitle.style.color = (type === "success") ? "#006600" : "var(--error-border)";
         alertBox.style.display = 'flex';
         setStatus(msg.replace(/<[^>]*>?/gm, ''));
     };
-    document.getElementById('closeAlertBtn').addEventListener('click', () => alertBox.style.display = 'none');
+    window.closeAlertMsg = () => alertBox.style.display = 'none';
 
-    function showAboutInfo() {
-        showMsg("About System", "<b>Oracle Java (Java™) is used to develop powerful backend web applications that handle data, business logic, and server-side processing. </b></br></br><b>All Rights Reserved  Kashor Multiflex Facility(KMF)</b><br><br>Version 1.0.7<br>Powered by Ratul Hasan.<br>.", "success");
+    window.showAboutInfo = () => {
+        showMsg("About System", "<b>Oracle Java (Java™) is used to develop powerful backend web applications that handle data, business logic, and server-side processing. </b></br></br><b>All Rights Reserved Kashor Multiflex Facility(KMF)</b><br><br>Version 1.0.9<br>Powered by Ratul Hasan.", "success");
     }
 
     // --- Form State Management (Locking) ---
@@ -590,7 +615,7 @@
     };
 
     // Auto-Uppercase & Error clearing
-    document.querySelectorAll('.req-field').forEach(input => {
+    document.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', function() { 
             this.classList.remove('error-field'); 
             currentGeneratedRows = null; 
@@ -621,50 +646,41 @@
         modalActionType = type;
         const title = document.getElementById('inputModalTitle');
         const heading = document.getElementById('inputModalHeading');
-        const desc = document.getElementById('inputModalDesc');
-        const btn = document.getElementById('modalOkBtn');
         const input = document.getElementById('modalBatchInput');
         
-        input.value = ''; // Clear previous
+        input.value = ''; 
         
         if(type === 'search') {
             title.innerText = 'Query Mode';
             heading.innerText = 'Search / Load Record';
             heading.style.color = 'var(--ora-header)';
-            desc.innerText = 'Enter or select Batch Number to retrieve data:';
-            btn.innerText = 'Find';
-            btn.style.background = '#D4E6F1';
         } else if(type === 'delete') {
             title.innerText = 'Delete Record';
             heading.innerText = 'Warning: Delete Action';
             heading.style.color = 'var(--error-border)';
-            desc.innerText = 'Enter Batch Number to permanently delete:';
-            btn.innerText = 'Delete';
-            btn.style.background = '#FADBD8';
         }
         
         inputModal.style.display = 'flex';
-        input.focus();
+        setTimeout(() => input.focus(), 100);
     };
 
     window.closeInputModal = () => {
         inputModal.style.display = 'none';
     };
 
-    document.getElementById('modalOkBtn').addEventListener('click', () => {
+    window.submitModal = () => {
         const batchVal = document.getElementById('modalBatchInput').value.trim().toUpperCase();
         if(!batchVal) {
             alert("Please enter a Batch Number.");
             return;
         }
-        
         if(modalActionType === 'search') {
             executeSearchLoad(batchVal);
         } else if(modalActionType === 'delete') {
             executeDelete(batchVal);
         }
         closeInputModal();
-    });
+    };
 
     // --- Search Logic ---
     const executeSearchLoad = (searchVal) => {
@@ -672,11 +688,19 @@
         if(data) {
             document.getElementById('prodName').value = data.prodName || "";
             document.getElementById('batchNo').value = data.batchNo || "";
-            document.getElementById('prodType').value = data.prodType || "DPI";
+            
+            const prodTypeDropdown = document.getElementById('prodType');
+            prodTypeDropdown.value = data.prodType || "DPI";
+            prodTypeDropdown.dispatchEvent(new Event('change')); // Trigger MDI toggle
+            
             document.getElementById('boothStart').value = data.boothStart || "";
             document.getElementById('boothEnd').value = data.boothEnd || "";
             document.getElementById('dispStart').value = data.dispStart || "";
             document.getElementById('dispEnd').value = data.dispEnd || "";
+            document.getElementById('dispStart2').value = data.dispStart2 || "";
+            document.getElementById('dispEnd2').value = data.dispEnd2 || "";
+            document.getElementById('roomCleanStart').value = data.roomCleanStart || "";
+            
             document.getElementById('boothOperator').value = data.boothOperator || "";
             document.getElementById('dispOperator').value = data.dispOperator || "";
             document.getElementById('stagingOperator').value = data.stagingOperator || "";
@@ -750,8 +774,7 @@
 
     // --- SAVE / UPDATE Logic ---
     window.appSaveRecord = () => {
-        // Prevent saving if form is locked
-        if(document.getElementById('saveDataBtn') && document.getElementById('saveDataBtn').disabled) {
+        if(document.getElementById('generateBtn') && document.getElementById('generateBtn').disabled) {
             return showMsg("Error", "Record is locked and cannot be saved.", "error");
         }
 
@@ -786,6 +809,9 @@
             boothEnd: document.getElementById('boothEnd').value,
             dispStart: document.getElementById('dispStart').value,
             dispEnd: document.getElementById('dispEnd').value,
+            dispStart2: document.getElementById('dispStart2').value,
+            dispEnd2: document.getElementById('dispEnd2').value,
+            roomCleanStart: document.getElementById('roomCleanStart').value,
             boothOperator: document.getElementById('boothOperator').value.trim(),
             dispOperator: document.getElementById('dispOperator').value.trim(),
             stagingOperator: document.getElementById('stagingOperator').value.trim(),
@@ -811,10 +837,12 @@
         let hasError = false;
         
         document.querySelectorAll('.req-field').forEach(el => {
-            if (!el.value.trim()) { el.classList.add('error-field'); hasError = true; }
+            if (!el.value.trim() && el.style.display !== 'none') { // only check visible required fields
+                el.classList.add('error-field'); hasError = true; 
+            }
         });
 
-        if (hasError) return showMsg("Validation Error", "FRM-40202: Field must be entered.", "error");
+        if (hasError) return showMsg("Validation Error", "FRM-40202: All required fields must be entered.", "error");
 
         const prodName = document.getElementById('prodName').value.trim();
         const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
@@ -823,6 +851,9 @@
         const boothEnd = new Date(document.getElementById('boothEnd').value);
         const dispStart = new Date(document.getElementById('dispStart').value);
         const dispEnd = new Date(document.getElementById('dispEnd').value);
+        
+        // Manual Room Start
+        const roomStart = new Date(document.getElementById('roomCleanStart').value);
 
         const boothOp = document.getElementById('boothOperator').value.trim();
         const dispOp = document.getElementById('dispOperator').value.trim();
@@ -835,9 +866,32 @@
         document.getElementById("hdrBatchNo").innerText = batchNo;
         document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(boothStart);
 
-        let stagingStart = type === 'DPI' ? addMins(dispEnd, 4) : addMins(dispEnd, 2);
+        // Build Production Rows
+        const rawRows = [
+            { task: "PRODUCTION PHASE", isSection: true },
+            { task: "Booth Operation", startStr: formatTime(boothStart), endStr: formatTime(boothEnd), by: boothOp },
+            { task: "Dispensing Operation 1", startStr: formatTime(dispStart), endStr: formatTime(dispEnd), by: dispOp }
+        ];
 
-        const roomStart = addMins(dispEnd, 7,9);
+        // MDI Logic (Double Dispense, Double Staging)
+        if (type === 'MDI') {
+            const dispStart2 = new Date(document.getElementById('dispStart2').value);
+            const dispEnd2 = new Date(document.getElementById('dispEnd2').value);
+            
+            rawRows.push({ task: "Dispensing Operation 2", startStr: formatTime(dispStart2), endStr: formatTime(dispEnd2), by: dispOp });
+            
+            let stagingStart1 = addMins(dispEnd, 2);
+            let stagingStart2 = addMins(dispEnd2, 2);
+            
+            rawRows.push({ task: "Staging 1 (MDI)", startStr: formatTime(stagingStart1), endStr: null, by: stagingOp });
+            rawRows.push({ task: "Staging 2 (MDI)", startStr: formatTime(stagingStart2), endStr: null, by: stagingOp });
+        } else {
+            // DPI Logic
+            let stagingStart = addMins(dispEnd, 4);
+            rawRows.push({ task: "Staging (DPI)", startStr: formatTime(stagingStart), endStr: null, by: stagingOp });
+        }
+
+        // Full Cleaning Algorithm (Based on Manual roomStart)
         const roomEnd = addMins(roomStart, rand(76, 85));
         const bCleanStart = addMins(roomStart, rand(4, 8));
         const bCleanEnd = addMins(bCleanStart, rand(40, 45));
@@ -856,12 +910,7 @@
         const ppeStart = addMins(bCleanEnd, rand(2, 4));
         const ppeEnd = addMins(ppeStart, rand(14, 17));
 
-        const rawRows = [
-            { task: "PRODUCTION PHASE", isSection: true },
-            { task: "Booth Operation", startStr: formatTime(boothStart), endStr: formatTime(boothEnd), by: boothOp },
-            { task: "Dispensing Operation", startStr: formatTime(dispStart), endStr: formatTime(dispEnd), by: dispOp },
-            { task: `Staging (${type})`, startStr: formatTime(stagingStart), endStr: null, by: stagingOp },
-            
+        rawRows.push(
             { task: "FULL CLEANING PHASE", isSection: true },
             { task: "Room Full Cleaning", startStr: formatTime(roomStart), endStr: formatTime(roomEnd), by: cleanerR },
             { task: "Booth Full Cleaning", startStr: formatTime(bCleanStart), endStr: formatTime(bCleanEnd), by: cleanerB },
@@ -872,7 +921,7 @@
             { task: "19 Passbox Cleaning", startStr: formatTime(pb19S), endStr: formatTime(pb19E), by: cleanerE },
             { task: "Accessories Cleaning", startStr: formatTime(accStart), endStr: formatTime(accEnd), by: cleanerE },
             { task: "PPE Cleaning", startStr: formatTime(ppeStart), endStr: formatTime(ppeEnd), by: cleanerB }
-        ];
+        );
 
         currentGeneratedRows = rawRows;
         renderTable(currentGeneratedRows);
@@ -900,7 +949,7 @@
         return canvas;
     };
 
-    document.getElementById('downloadBtn').addEventListener('click', async () => {
+    window.triggerDownload = async function() {
         setStatus("Exporting image...");
         const batchNo = document.getElementById('batchNo').value.trim() || "EXPORT";
         const canvas = await getCanvas();
@@ -909,9 +958,9 @@
         link.href = canvas.toDataURL('image/png');
         link.click();
         setStatus("Export complete.");
-    });
+    };
 
-    document.getElementById('shareImageBtn').addEventListener('click', async () => {
+    window.triggerShare = async function() {
         if (!navigator.share) return alert("Sharing API not supported on this browser.");
         const batchNo = document.getElementById('batchNo').value.trim() || "DATA";
         try {
@@ -928,9 +977,9 @@
         } catch (err) {
             setStatus("Share cancelled or failed.");
         }
-    });
+    };
 
-    document.getElementById('sendDataBtn').addEventListener('click', async () => {
+    window.triggerDataSend = async function() {
         if (!navigator.share) return alert("Sharing API not supported on this browser.");
         
         const batchNo = document.getElementById('batchNo').value.trim() || "N/A";
@@ -946,17 +995,18 @@
                     textData += `▪️ ${r.task} | ${r.startStr} to ${r.endStr || '-'} | By: ${r.by}\n`;
                 }
             });
+            try {
+                await navigator.share({
+                    title: `KMF Data - ${batchNo}`,
+                    text: textData
+                });
+            } catch (err) {
+                console.log('Error sending text:', err);
+            }
+        } else {
+            alert("Generate Master Log first.");
         }
-
-        try {
-            await navigator.share({
-                title: `KMF Data - ${batchNo}`,
-                text: textData
-            });
-        } catch (err) {
-            console.log('Error sending text:', err);
-        }
-    });
+    };
 
 </script>
 
