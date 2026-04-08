@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oracle Applications - KMF Dispensing</title>
+    
+    <!-- html2canvas library for converting HTML to Image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Classic Oracle/Java Application UI Variables */
+        :root {
+            --ora-bg: #E4E3DD;
+            --ora-panel: #F3F3F0;
+            --ora-blue: #3A5A8C;
+            --ora-light-blue: #B6C5D4;
+            --ora-border: #7F9DB9;
+            --ora-text: #000000;
+            --ora-btn-bg: #E0DFD9;
+            --ora-btn-border: #999999;
+            --ora-header: #003366;
+            --error-bg: #FFEEEE;
+            --error-border: #CC0000;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            background-color: var(--ora-bg);
+            color: var(--ora-text);
+            padding: 5px;
+            font-size: 12px; 
+            min-height: 100vh;
+        }
+
+        /* Fake Window Frame */
+        .app-window {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--ora-panel);
+            border: 2px solid #FFFFFF;
+            border-right-color: #888888;
+            border-bottom-color: #888888;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Title Bar */
+        .title-bar {
+            background: linear-gradient(to right, #0A246A, #A6CAF0);
+            color: white;
+            padding: 6px 8px;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- Interactive Menu Bar --- */
+        .menu-bar {
+            background: var(--ora-bg);
+            border-bottom: 1px solid #FFFFFF;
+            padding: 2px 5px;
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: #000;
+        }
+        .menu-item {
+            position: relative;
+            padding: 4px 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: #000080;
+            color: white;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--ora-panel);
+            border: 2px solid #FFFFFF;
+            border-right-color: #888888;
+            border-bottom-color: #888888;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            z-index: 2000;
+            min-width: 180px;
+            color: var(--ora-text);
+            padding: 2px;
+        }
+        .menu-item.active .dropdown { display: block; }
+        
+        .dropdown-item {
+            padding: 4px 15px 4px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .dropdown-item:hover {
+            background: #0A246A;
+            color: white;
+        }
+        .dropdown-separator {
+            height: 1px;
+            background: #888888;
+            border-bottom: 1px solid #FFFFFF;
+            margin: 3px 2px;
+        }
+        .shortcut { color: #666; font-size: 11px; padding-left: 15px;}
+        .dropdown-item:hover .shortcut { color: #CCC; }
+
+        /* Toolbar (Simplified) */
+        .toolbar {
+            background: var(--ora-bg);
+            border-top: 1px solid #888888;
+            border-bottom: 1px solid #888888;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toolbar-title { font-weight: bold; color: var(--ora-blue); font-size: 12px; }
+
+        /* Main Content Area */
+        .content-area {
+            padding: 10px;
+            background: #FFFFFF;
+            border: 1px solid #888888;
+            border-top-color: #FFFFFF;
+            border-left-color: #FFFFFF;
+            margin: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Oracle Panel / Fieldset */
+        .ora-panel {
+            border: 1px solid var(--ora-border);
+            padding: 15px 10px 10px 10px;
+            position: relative;
+            background: #F9F9F9;
+            margin-top: 8px;
+        }
+        .ora-panel-title {
+            position: absolute;
+            top: -9px;
+            left: 10px;
+            background: #F9F9F9;
+            padding: 0 5px;
+            color: var(--ora-blue);
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .grid-2, .grid-3 { display: grid; gap: 10px; grid-template-columns: 1fr; }
+        .input-group { display: flex; flex-direction: column; }
+
+        label { font-size: 12px; color: var(--ora-text); margin-bottom: 4px; font-weight: normal; }
+
+        input, select {
+            padding: 6px 8px;
+            border: 1px solid #A9A9A9;
+            border-top-color: #888888;
+            border-left-color: #888888;
+            background-color: #FFFFFF;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            background-color: #FFFFCC;
+            outline: none;
+            border-color: var(--ora-blue);
+        }
+
+        input:disabled, select:disabled {
+            background-color: #EFEFEF;
+            color: #666;
+            cursor: not-allowed;
+            border-color: #CCC;
+        }
+
+        .batch-input { text-transform: uppercase; font-weight: bold; color: var(--ora-blue); }
+
+        input.error-field, select.error-field {
+            border: 1px solid var(--error-border) !important;
+            background-color: var(--error-bg) !important;
+        }
+
+        /* Oracle Buttons */
+        .btn {
+            background: var(--ora-btn-bg);
+            border: 1px solid #FFFFFF;
+            border-right-color: #888888;
+            border-bottom-color: #888888;
+            padding: 6px 12px;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .btn:active:not(:disabled) {
+            border: 1px solid #888888;
+            border-right-color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+            padding: 7px 11px 5px 13px;
+        }
+        .btn:disabled { color: #999; cursor: not-allowed; }
+
+        .btn-primary { background: #D4E6F1; border-color: #A9CCE3; width: 100%; padding: 8px;}
+        
+        .main-actions { margin-top: 5px; display: flex; gap: 10px; width: 100%;}
+        .export-actions { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; justify-content: flex-end;}
+        .export-actions .btn { flex: 1; min-width: 80px; }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--ora-bg);
+            border-top: 1px solid #888888;
+            padding: 5px 10px;
+            font-size: 11px;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: center;
+        }
+
+        /* Popups */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .popup {
+            background: var(--ora-panel); border: 2px solid #FFFFFF; border-right-color: #888888; border-bottom-color: #888888;
+            padding: 2px; width: 90%; max-width: 320px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        .popup-header { background: #0A246A; color: white; padding: 5px 8px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between;}
+        .popup-content { padding: 15px; background: #FFFFFF; text-align: center; }
+        .popup-content h3 { margin-bottom: 8px; font-size: 14px; color: var(--error-border);}
+        .popup-content p { margin-bottom: 15px; font-size: 12px; line-height: 1.4;}
+        .popup-content .btn { width: 100px; }
+        
+        .modal-input { margin-bottom: 15px; width: 100%; text-transform: uppercase; text-align: center; font-weight: bold;}
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; background: #FFFFFF; border: 1px solid var(--ora-border); margin-top: 5px; table-layout: fixed; }
+        th, td { padding: 6px 4px; border: 1px solid var(--ora-border); font-size: 10px; text-align: left; word-wrap: break-word; vertical-align: middle;}
+        th { background: #D3DCE3; color: var(--ora-header); font-weight: bold; border-bottom: 2px solid #99B4D1; text-align: center; font-size: 10px;}
+        
+        th:nth-child(1), td:nth-child(1) { width: 33%; }
+        th:nth-child(2), td:nth-child(2) { width: 20%; text-align: center; }
+        th:nth-child(3), td:nth-child(3) { width: 20%; text-align: center; }
+        th:nth-child(4), td:nth-child(4) { width: 27%; text-align: center; font-weight: bold;}
+        .section-row { background: #E8EEF7 !important; color: var(--ora-header); font-weight: bold; text-transform: uppercase; font-size: 10px;}
+        
+        #resultArea { display: none; }
+
+        /* Setup specifically for PNG Export */
+        #captureArea { background-color: #FFFFFF; padding: 0; }
+        #pngHeader { display: none; margin-bottom: 10px; border: 1px solid var(--ora-border); padding: 10px; background: #F9F9F9; }
+        .gmp-header-title { font-size: 14px; font-weight: bold; color: var(--ora-header); text-align: center; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid var(--ora-border); padding-bottom: 5px;}
+        .gmp-header-info { display: flex; flex-direction: column; gap: 5px; font-size: 11px; font-weight: bold; color: #000; }
+        .gmp-header-info span { color: var(--ora-blue); font-weight: normal; }
+
+        /* Ad & Footer */
+        .app-footer { margin-top: 10px; text-align: center; padding: 10px; background: var(--ora-panel); border: 1px solid #888888; }
+        .powered-by { font-size: 11px; margin-bottom: 10px; font-weight: bold; }
+        .powered-by a { color: var(--ora-blue); text-decoration: none; }
+
+        @media (min-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+            .grid-3 { grid-template-columns: repeat(3, 1fr); }
+            
+            .input-group.horizontal { flex-direction: row; align-items: center; justify-content: space-between; }
+            .input-group.horizontal label { width: 130px; margin-bottom: 0; }
+            
+            .status-bar { flex-direction: row; justify-content: space-between; text-align: left; }
+            .btn-primary { width: 200px; }
+            .export-actions { justify-content: flex-end; flex-wrap: nowrap; }
+            .export-actions .btn { flex: unset; width: auto; }
+            
+            .gmp-header-info { flex-direction: row; justify-content: space-between; }
+            th, td { font-size: 11px; padding: 6px; }
+        }
+
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .title-bar, .menu-bar, .toolbar, .ora-panel:not(#resultArea), .main-actions, .status-bar, .app-footer { display: none !important; }
+            .app-window { box-shadow: none; border: none; max-width: 100%; width: 100%; }
+            .content-area { border: none; padding: 0; margin: 0; }
+            #resultArea { display: block !important; border: none; padding: 0; margin: 0;}
+            table { border: 1px solid #000; }
+            th, td { border: 1px solid #000; font-size: 10px; padding: 4px; }
+            .section-row { background: #EEEEEE !important; color: #000; -webkit-print-color-adjust: exact; }
+            #pngHeader { display: block; border: 1px solid #000; background: white; }
+            .gmp-header-info { flex-direction: row; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Alert Popup -->
+<div class="overlay" id="customAlert">
+    <div class="popup">
+        <div class="popup-header">
+            <span>System Message</span>
+            <span style="cursor:pointer" onclick="document.getElementById('customAlert').style.display='none'">X</span>
+        </div>
+        <div class="popup-content">
+            <h3 id="alertTitle">Error</h3>
+            <p id="alertMsg">Please fill in all required fields.</p>
+            <button class="btn" id="closeAlertBtn">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- Input Modal (For Search and Delete) -->
+<div class="overlay" id="inputModal">
+    <div class="popup">
+        <div class="popup-header">
+            <span id="inputModalTitle">Query Mode</span>
+            <span style="cursor:pointer" onclick="closeInputModal()">X</span>
+        </div>
+        <div class="popup-content">
+            <h3 id="inputModalHeading" style="color:var(--ora-header);">Enter Batch Number</h3>
+            <p id="inputModalDesc">Type or select batch number to proceed.</p>
+            <input type="text" id="modalBatchInput" class="modal-input" list="batchList" placeholder="e.g. BATCH-01">
+            <datalist id="batchList"></datalist>
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button class="btn" id="modalOkBtn" style="background:#D4E6F1;">OK</button>
+                <button class="btn" onclick="closeInputModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-window">
+    <div class="title-bar">
+        <span>☕</span>
+        <span>KMF Dispensing Helper - Java™</span>
+    </div>
+    
+    <!-- INTERACTIVE MENU BAR -->
+    <div class="menu-bar" id="menuBar">
+        <div class="menu-item" data-menu="file">
+            <u>F</u>ile
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="window.location.reload()"><span>New / Clear Form</span><span class="shortcut">Ctrl+N</span></div>
+                <div class="dropdown-separator"></div>
+                <div class="dropdown-item" onclick="appSaveRecord()"><span>Save / Update Record</span><span class="shortcut">Ctrl+S</span></div>
+                <div class="dropdown-separator"></div>
+                <div class="dropdown-item" onclick="window.print()"><span>Print Output</span><span class="shortcut">Ctrl+P</span></div>
+                <div class="dropdown-separator"></div>
+                <div class="dropdown-item" onclick="window.close()"><span>Exit</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-menu="edit">
+            <u>E</u>dit
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="openInputModal('search')"><span>Search / Load Batch</span><span class="shortcut">Ctrl+F</span></div>
+                <div class="dropdown-separator"></div>
+                <div class="dropdown-item" onclick="openInputModal('delete')"><span>Delete Batch Record</span><span class="shortcut">Del</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-menu="view">
+            <u>V</u>iew
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="scrollToResult()"><span>View data Output </span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-menu="tools">
+            <u>T</u>ools
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="document.getElementById('downloadBtn').click()"><span>Export as Image</span></div>
+                <div class="dropdown-item" onclick="document.getElementById('shareImageBtn').click()"><span>Share Image</span></div>
+                <div class="dropdown-item" onclick="document.getElementById('sendDataBtn').click()"><span>Send Text Data</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-menu="help">
+            <u>H</u>elp
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="showAboutInfo()"><span>About System</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="toolbar-title"> Kashor Multiflex Facility </div>
+        <div class="toolbar-title" id="lockStatus" style="font-weight:normal; color:var(--ora-text);">✏️ Status: Editable</div>
+    </div>
+
+    <div class="content-area">
+        <div class="ora-panel">
+            <div class="ora-panel-title">1.Product & Dispensing Details</div>
+            <div class="grid-2">
+                <div class="input-group horizontal">
+                    <label>Product Name</label>
+                    <input type="text" id="prodName" class="req-field">
+                </div>
+                <div class="input-group horizontal">
+                    <label>Batch Number</label>
+                    <input type="text" id="batchNo" class="req-field batch-input">
+                </div>
+                <div class="input-group horizontal">
+                    <label>Product Area</label>
+                    <select id="prodType" class="req-field">
+                        <option value="DPI">DPI(Dry Powder Inhaler)</option>
+                        <option value="MDI">MDI(Metered Dose Inhaler)</option>
+                    </select>
+                </div>
+                <div class="input-group horizontal"><label>Booth Start</label><input type="datetime-local" id="boothStart" class="req-field"></div>
+                <div class="input-group horizontal"><label>Booth End</label><input type="datetime-local" id="boothEnd" class="req-field"></div>
+                <div class="input-group horizontal"><label>Dispense Start</label><input type="datetime-local" id="dispStart" class="req-field"></div>
+                <div class="input-group horizontal"><label>Dispense End</label><input type="datetime-local" id="dispEnd" class="req-field"></div>
+            </div>
+        </div>
+
+        <div class="ora-panel">
+            <div class="ora-panel-title">2.Dispensing Operation Personnel</div>
+            <div class="grid-3">
+                <div class="input-group"><label>Booth Operator</label><input type="text" id="boothOperator" class="req-field"></div>
+                <div class="input-group"><label>Dispensing Operator</label><input type="text" id="dispOperator" class="req-field"></div>
+                <div class="input-group"><label>Staging Operator</label><input type="text" id="stagingOperator" class="req-field"></div>
+            </div>
+        </div>
+
+        <div class="ora-panel">
+            <div class="ora-panel-title">3. Full Cleaning Personnel</div>
+            <div class="grid-3">
+                <div class="input-group"><label>Clean Person 1 (Room)</label><input type="text" id="cleanerRoom" class="req-field"></div>
+                <div class="input-group"><label>Clean Person 2 (Booth/Bal/PPE)</label><input type="text" id="cleanerBooth" class="req-field"></div>
+                <div class="input-group"><label>Clean Person 3 (Eth/PB/Acces)</label><input type="text" id="cleanerEth" class="req-field"></div>
+            </div>
+        </div>
+
+        <div class="main-actions">
+            <button class="btn btn-primary" id="generateBtn">Execute Program & Build Data</button>
+        </div>
+
+        <div class="ora-panel" id="resultArea">
+            <div class="ora-panel-title">Output: KMF Dispensing -Operation and Cleaning Details</div>
+            <div class="export-actions">
+                <button class="btn" id="downloadBtn">Export Image</button>
+                <button class="btn" id="shareImageBtn">Share Image</button>
+                <button class="btn" id="sendDataBtn">Send Data</button>
+                <button class="btn" onclick="window.print()">Print</button>
+            </div>
+            
+            <div id="captureArea">
+                <div id="pngHeader">
+                    <div class="gmp-header-title">Dispensing Operation & Full Cleaning Details</div>
+                    <div class="gmp-header-info">
+                        <div>Product: <span id="hdrProdName"></span></div>
+                        <div>Batch No: <span id="hdrBatchNo"></span></div>
+                        <div id="hdrDate">Date: </div>
+                    </div>
+                </div>
+                
+                <table id="logTable">
+                    <thead><tr><th>Process Name</th><th>Start Time</th><th>End Time</th><th>Performed By</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ad & Footer Area -->
+    <div class="app-footer">
+        <div class="powered-by">Powered by <a href="https://wa.me/8801910254667" target="_blank">Ratul Hasan</a></div>
+        <div class="ad-container">
+            <script type="text/javascript">
+              atOptions = {
+                'key' : 'e8d156b2876798842923e2f7475b7419',
+                'format' : 'iframe',
+                'height' : 250,
+                'width' : 300,
+                'params' : {}
+              };
+            </script>
+            <script type="text/javascript" src="https://momrollback.com/e8d156b2876798842923e2f7475b7419/invoke.js"></script>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="statusText">Ready</span>
+        <span>Oracle E-Business Suite helps manage your app’s data, users, and business operations in a centralized backend system. KMF_Dispensing_Manager</span>
+    </div>
+</div>
+
+<script>
+    // --- Global State ---
+    let currentGeneratedRows = null;
+    let modalActionType = ''; // 'search' or 'delete'
+    const STORAGE_PREFIX = "ORA_BATCH_";
+
+    // --- Core Helpers ---
+    const addMins = (date, mins) => new Date(date.getTime() + mins * 60000);
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const formatTime = (d) => {
+        if (!d || isNaN(d.getTime())) return '-';
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
+    const formatDatePharma = (d) => {
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
+    };
+    const setStatus = (msg) => document.getElementById('statusText').innerText = msg;
+    const scrollToResult = () => {
+        const res = document.getElementById('resultArea');
+        if(res.style.display === 'block') res.scrollIntoView({ behavior: 'smooth' });
+        else showMsg("Notice", "Please Select Batch number first or Create new ", "error");
+    };
+
+    // --- UI Interactions ---
+    // Menu System
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.menu-item').forEach(item => {
+            if (!item.contains(e.target)) item.classList.remove('active');
+        });
+        if (e.target.closest('.menu-item')) {
+            e.target.closest('.menu-item').classList.toggle('active');
+        }
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            appSaveRecord();
+        }
+        if (e.ctrlKey && e.key.toLowerCase() === 'f') {
+            e.preventDefault();
+            openInputModal('search');
+        }
+        if (e.ctrlKey && e.key.toLowerCase() === 'n') {
+            e.preventDefault();
+            window.location.reload();
+        }
+    });
+
+    // Custom Alert
+    const alertBox = document.getElementById('customAlert');
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMsg = document.getElementById('alertMsg');
+    
+    const showMsg = (title, msg, type="error") => {
+        alertTitle.innerText = title;
+        alertMsg.innerHTML = msg;
+        alertTitle.style.color = (type === "success") ? "#006600" : "var(--error-border)";
+        alertBox.style.display = 'flex';
+        setStatus(msg.replace(/<[^>]*>?/gm, ''));
+    };
+    document.getElementById('closeAlertBtn').addEventListener('click', () => alertBox.style.display = 'none');
+
+    function showAboutInfo() {
+        showMsg("About System", "<b>Oracle Java (Java™) is used to develop powerful backend web applications that handle data, business logic, and server-side processing. </b></br></br><b>All Rights Reserved  Kashor Multiflex Facility(KMF)</b><br><br>Version 1.0.7<br>Powered by Ratul Hasan.<br>.", "success");
+    }
+
+    // --- Form State Management (Locking) ---
+    const setFormState = (isLocked) => {
+        document.querySelectorAll('.req-field').forEach(el => el.disabled = isLocked);
+        document.getElementById('generateBtn').disabled = isLocked;
+        
+        const lockStatus = document.getElementById('lockStatus');
+        if(isLocked) {
+            lockStatus.innerText = "🔒 Status: READ-ONLY (Locked)";
+            lockStatus.style.color = "var(--error-border)";
+            lockStatus.style.fontWeight = "bold";
+        } else {
+            lockStatus.innerText = "✏️ Status: Editable";
+            lockStatus.style.color = "var(--ora-text)";
+            lockStatus.style.fontWeight = "normal";
+        }
+    };
+
+    // Auto-Uppercase & Error clearing
+    document.querySelectorAll('.req-field').forEach(input => {
+        input.addEventListener('input', function() { 
+            this.classList.remove('error-field'); 
+            currentGeneratedRows = null; 
+        });
+    });
+    document.getElementById('batchNo').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+    document.getElementById('modalBatchInput').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+    // --- Storage & Datalist ---
+    const loadDatalist = () => {
+        const datalist = document.getElementById('batchList');
+        datalist.innerHTML = '';
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(STORAGE_PREFIX)) {
+                const option = document.createElement('option');
+                option.value = key.replace(STORAGE_PREFIX, '');
+                datalist.appendChild(option);
+            }
+        }
+    };
+    document.addEventListener('DOMContentLoaded', loadDatalist);
+
+    // --- CUSTOM INPUT MODAL (Search & Delete) ---
+    const inputModal = document.getElementById('inputModal');
+    
+    window.openInputModal = (type) => {
+        modalActionType = type;
+        const title = document.getElementById('inputModalTitle');
+        const heading = document.getElementById('inputModalHeading');
+        const desc = document.getElementById('inputModalDesc');
+        const btn = document.getElementById('modalOkBtn');
+        const input = document.getElementById('modalBatchInput');
+        
+        input.value = ''; // Clear previous
+        
+        if(type === 'search') {
+            title.innerText = 'Query Mode';
+            heading.innerText = 'Search / Load Record';
+            heading.style.color = 'var(--ora-header)';
+            desc.innerText = 'Enter or select Batch Number to retrieve data:';
+            btn.innerText = 'Find';
+            btn.style.background = '#D4E6F1';
+        } else if(type === 'delete') {
+            title.innerText = 'Delete Record';
+            heading.innerText = 'Warning: Delete Action';
+            heading.style.color = 'var(--error-border)';
+            desc.innerText = 'Enter Batch Number to permanently delete:';
+            btn.innerText = 'Delete';
+            btn.style.background = '#FADBD8';
+        }
+        
+        inputModal.style.display = 'flex';
+        input.focus();
+    };
+
+    window.closeInputModal = () => {
+        inputModal.style.display = 'none';
+    };
+
+    document.getElementById('modalOkBtn').addEventListener('click', () => {
+        const batchVal = document.getElementById('modalBatchInput').value.trim().toUpperCase();
+        if(!batchVal) {
+            alert("Please enter a Batch Number.");
+            return;
+        }
+        
+        if(modalActionType === 'search') {
+            executeSearchLoad(batchVal);
+        } else if(modalActionType === 'delete') {
+            executeDelete(batchVal);
+        }
+        closeInputModal();
+    });
+
+    // --- Search Logic ---
+    const executeSearchLoad = (searchVal) => {
+        const data = JSON.parse(localStorage.getItem(STORAGE_PREFIX + searchVal));
+        if(data) {
+            document.getElementById('prodName').value = data.prodName || "";
+            document.getElementById('batchNo').value = data.batchNo || "";
+            document.getElementById('prodType').value = data.prodType || "DPI";
+            document.getElementById('boothStart').value = data.boothStart || "";
+            document.getElementById('boothEnd').value = data.boothEnd || "";
+            document.getElementById('dispStart').value = data.dispStart || "";
+            document.getElementById('dispEnd').value = data.dispEnd || "";
+            document.getElementById('boothOperator').value = data.boothOperator || "";
+            document.getElementById('dispOperator').value = data.dispOperator || "";
+            document.getElementById('stagingOperator').value = data.stagingOperator || "";
+            document.getElementById('cleanerRoom').value = data.cleanerRoom || "";
+            document.getElementById('cleanerBooth').value = data.cleanerBooth || "";
+            document.getElementById('cleanerEth').value = data.cleanerEth || "";
+            
+            document.getElementById("hdrProdName").innerText = data.prodName || "-";
+            document.getElementById("hdrBatchNo").innerText = data.batchNo || "-";
+            if(data.boothStart) {
+                document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(new Date(data.boothStart));
+            }
+
+            if (data.logRows) {
+                currentGeneratedRows = data.logRows;
+                renderTable(data.logRows);
+            } else {
+                document.getElementById('generateBtn').click();
+            }
+
+            const timestamp = data.saveTimestamp || 0; 
+            const ageMs = Date.now() - timestamp;
+            const lockTimeMs = 30 * 60 * 1000;
+
+            if (ageMs > lockTimeMs) {
+                setFormState(true);
+                showMsg("Query Executed", `Record retrieved. Status: READ-ONLY (Locked).`, "error");
+            } else {
+                setFormState(false);
+                const minsLeft = Math.floor((lockTimeMs - ageMs) / 60000);
+                showMsg("Query Executed", `Record retrieved. Editable for ${minsLeft} more minutes.`, "success");
+            }
+        } else {
+            showMsg("Query Error", "FRM-40301: Query caused no records to be retrieved.", "error");
+        }
+    };
+
+    // --- Delete Logic ---
+    const executeDelete = (searchVal) => {
+        if(localStorage.getItem(STORAGE_PREFIX + searchVal) !== null) {
+            if(confirm(`Are you sure you want to completely remove BATCH: ${searchVal}?`)) {
+                localStorage.removeItem(STORAGE_PREFIX + searchVal);
+                loadDatalist();
+                showMsg("Record Deleted", `FRM-40400: Record for ${searchVal} deleted.`, "success");
+            }
+        } else {
+            showMsg("Delete Error", "Record not found in database.", "error");
+        }
+    };
+
+    // --- RENDER TABLE FUNCTION ---
+    const renderTable = (rowsData) => {
+        const tbody = document.querySelector("#logTable tbody");
+        tbody.innerHTML = ""; 
+        rowsData.forEach(r => {
+            const tr = document.createElement("tr");
+            if (r.isSection) {
+                tr.innerHTML = `<td colspan="4" class="section-row">${r.task}</td>`;
+            } else {
+                tr.innerHTML = `
+                    <td>${r.task}</td>
+                    <td>${r.startStr || '-'}</td>
+                    <td>${r.endStr || '-'}</td>
+                    <td style="font-weight:bold; color:var(--ora-blue);">${r.by}</td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+        document.getElementById("resultArea").style.display = "block";
+    };
+
+    // --- SAVE / UPDATE Logic ---
+    window.appSaveRecord = () => {
+        // Prevent saving if form is locked
+        if(document.getElementById('saveDataBtn') && document.getElementById('saveDataBtn').disabled) {
+            return showMsg("Error", "Record is locked and cannot be saved.", "error");
+        }
+
+        const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
+        if (!batchNo) {
+            document.getElementById('batchNo').classList.add('error-field');
+            showMsg("FRM-40202", "Field must be entered: BATCH NUMBER.", "error");
+            return;
+        }
+
+        if (!currentGeneratedRows) {
+            document.getElementById('generateBtn').click();
+            if (!currentGeneratedRows) return; 
+        }
+
+        const existingDataJSON = localStorage.getItem(STORAGE_PREFIX + batchNo);
+        const isUpdate = existingDataJSON !== null;
+        
+        const timestamp = isUpdate ? (JSON.parse(existingDataJSON).saveTimestamp || Date.now()) : Date.now();
+
+        if (isUpdate && (Date.now() - timestamp > 30 * 60 * 1000)) {
+            showMsg("FRM-41000", "Record locked by system constraints. 30 minutes have passed since initial save.", "error");
+            setFormState(true);
+            return;
+        }
+
+        const batchData = {
+            prodName: document.getElementById('prodName').value.trim(),
+            batchNo: batchNo,
+            prodType: document.getElementById('prodType').value,
+            boothStart: document.getElementById('boothStart').value,
+            boothEnd: document.getElementById('boothEnd').value,
+            dispStart: document.getElementById('dispStart').value,
+            dispEnd: document.getElementById('dispEnd').value,
+            boothOperator: document.getElementById('boothOperator').value.trim(),
+            dispOperator: document.getElementById('dispOperator').value.trim(),
+            stagingOperator: document.getElementById('stagingOperator').value.trim(),
+            cleanerRoom: document.getElementById('cleanerRoom').value.trim(),
+            cleanerBooth: document.getElementById('cleanerBooth').value.trim(),
+            cleanerEth: document.getElementById('cleanerEth').value.trim(),
+            logRows: currentGeneratedRows,
+            saveTimestamp: timestamp
+        };
+
+        localStorage.setItem(STORAGE_PREFIX + batchNo, JSON.stringify(batchData));
+        loadDatalist();
+        
+        if (isUpdate) {
+            showMsg("Transaction Complete", `FRM-40400: Record Updated successfully. (Batch: ${batchNo})`, "success");
+        } else {
+            showMsg("Transaction Complete", `FRM-40400: 1 record applied and saved. (Batch: ${batchNo})`, "success");
+        }
+    };
+
+    // --- EXECUTE PROGRAM (GENERATE) ---
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        let hasError = false;
+        
+        document.querySelectorAll('.req-field').forEach(el => {
+            if (!el.value.trim()) { el.classList.add('error-field'); hasError = true; }
+        });
+
+        if (hasError) return showMsg("Validation Error", "FRM-40202: Field must be entered.", "error");
+
+        const prodName = document.getElementById('prodName').value.trim();
+        const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
+        const type = document.getElementById('prodType').value;
+        const boothStart = new Date(document.getElementById('boothStart').value);
+        const boothEnd = new Date(document.getElementById('boothEnd').value);
+        const dispStart = new Date(document.getElementById('dispStart').value);
+        const dispEnd = new Date(document.getElementById('dispEnd').value);
+
+        const boothOp = document.getElementById('boothOperator').value.trim();
+        const dispOp = document.getElementById('dispOperator').value.trim();
+        const stagingOp = document.getElementById('stagingOperator').value.trim();
+        const cleanerR = document.getElementById('cleanerRoom').value.trim();
+        const cleanerB = document.getElementById('cleanerBooth').value.trim();
+        const cleanerE = document.getElementById('cleanerEth').value.trim();
+
+        document.getElementById("hdrProdName").innerText = prodName;
+        document.getElementById("hdrBatchNo").innerText = batchNo;
+        document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(boothStart);
+
+        let stagingStart = type === 'DPI' ? addMins(dispEnd, 4) : addMins(dispEnd, 2);
+
+        const roomStart = addMins(dispEnd, 7,9);
+        const roomEnd = addMins(roomStart, rand(76, 85));
+        const bCleanStart = addMins(roomStart, rand(4, 8));
+        const bCleanEnd = addMins(bCleanStart, rand(40, 45));
+        const bal30S = addMins(bCleanStart, rand(5, 7));
+        const bal30E = addMins(bal30S, rand(7, 9));
+        const bal31S = addMins(bal30E, 1);
+        const bal31E = addMins(bal31S, rand(7, 9));
+        const ethStart = addMins(bCleanStart, rand(4, 6));
+        const ethEnd = addMins(ethStart, rand(13, 16));
+        const pb18S = addMins(ethEnd, 1);
+        const pb18E = addMins(pb18S, rand(9, 10));
+        const pb19S = addMins(pb18E, 1);
+        const pb19E = addMins(pb19S, rand(11, 12));
+        const accStart = addMins(pb19E, 3);
+        const accEnd = addMins(accStart, rand(4, 8));
+        const ppeStart = addMins(bCleanEnd, rand(2, 4));
+        const ppeEnd = addMins(ppeStart, rand(14, 17));
+
+        const rawRows = [
+            { task: "PRODUCTION PHASE", isSection: true },
+            { task: "Booth Operation", startStr: formatTime(boothStart), endStr: formatTime(boothEnd), by: boothOp },
+            { task: "Dispensing Operation", startStr: formatTime(dispStart), endStr: formatTime(dispEnd), by: dispOp },
+            { task: `Staging (${type})`, startStr: formatTime(stagingStart), endStr: null, by: stagingOp },
+            
+            { task: "FULL CLEANING PHASE", isSection: true },
+            { task: "Room Full Cleaning", startStr: formatTime(roomStart), endStr: formatTime(roomEnd), by: cleanerR },
+            { task: "Booth Full Cleaning", startStr: formatTime(bCleanStart), endStr: formatTime(bCleanEnd), by: cleanerB },
+            { task: "30 Balance Cleaning", startStr: formatTime(bal30S), endStr: formatTime(bal30E), by: cleanerB },
+            { task: "31 Balance Cleaning", startStr: formatTime(bal31S), endStr: formatTime(bal31E), by: cleanerB },
+            { task: "Ethanol Filter Cleaning", startStr: formatTime(ethStart), endStr: formatTime(ethEnd), by: cleanerE },
+            { task: "18 Passbox Cleaning", startStr: formatTime(pb18S), endStr: formatTime(pb18E), by: cleanerE },
+            { task: "19 Passbox Cleaning", startStr: formatTime(pb19S), endStr: formatTime(pb19E), by: cleanerE },
+            { task: "Accessories Cleaning", startStr: formatTime(accStart), endStr: formatTime(accEnd), by: cleanerE },
+            { task: "PPE Cleaning", startStr: formatTime(ppeStart), endStr: formatTime(ppeEnd), by: cleanerB }
+        ];
+
+        currentGeneratedRows = rawRows;
+        renderTable(currentGeneratedRows);
+        
+        scrollToResult();
+        setStatus("Program executed successfully. Output generated.");
+    });
+
+
+    // --- Image / Export / Send Logic ---
+    const getCanvas = async () => {
+        const captureDiv = document.getElementById("captureArea");
+        const headerInfo = document.getElementById("pngHeader");
+        
+        headerInfo.style.display = "block";
+        captureDiv.style.padding = "15px";
+        captureDiv.style.border = "1px solid #000";
+
+        const canvas = await html2canvas(captureDiv, { scale: 3, backgroundColor: "#ffffff" });
+        
+        headerInfo.style.display = "none";
+        captureDiv.style.padding = "0";
+        captureDiv.style.border = "none";
+        
+        return canvas;
+    };
+
+    document.getElementById('downloadBtn').addEventListener('click', async () => {
+        setStatus("Exporting image...");
+        const batchNo = document.getElementById('batchNo').value.trim() || "EXPORT";
+        const canvas = await getCanvas();
+        let link = document.createElement('a');
+        link.download = `KMF_LOG_${batchNo}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        setStatus("Export complete.");
+    });
+
+    document.getElementById('shareImageBtn').addEventListener('click', async () => {
+        if (!navigator.share) return alert("Sharing API not supported on this browser.");
+        const batchNo = document.getElementById('batchNo').value.trim() || "DATA";
+        try {
+            setStatus("Preparing file for share...");
+            const canvas = await getCanvas();
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `KMF_LOG_${batchNo}.png`, { type: 'image/png' });
+                await navigator.share({
+                    title: `Oracle KMF Log - ${batchNo}`,
+                    files: [file]
+                });
+                setStatus("Share complete.");
+            }, 'image/png');
+        } catch (err) {
+            setStatus("Share cancelled or failed.");
+        }
+    });
+
+    document.getElementById('sendDataBtn').addEventListener('click', async () => {
+        if (!navigator.share) return alert("Sharing API not supported on this browser.");
+        
+        const batchNo = document.getElementById('batchNo').value.trim() || "N/A";
+        const prodName = document.getElementById('prodName').value.trim() || "N/A";
+        
+        let textData = `*KMF Log Data*\nProduct: ${prodName}\nBatch: ${batchNo}\n\n`;
+        
+        if(currentGeneratedRows) {
+            currentGeneratedRows.forEach(r => {
+                if (r.isSection) {
+                    textData += `\n🔹 *${r.task}* 🔹\n`;
+                } else {
+                    textData += `▪️ ${r.task} | ${r.startStr} to ${r.endStr || '-'} | By: ${r.by}\n`;
+                }
+            });
+        }
+
+        try {
+            await navigator.share({
+                title: `KMF Data - ${batchNo}`,
+                text: textData
+            });
+        } catch (err) {
+            console.log('Error sending text:', err);
+        }
+    });
+
+</script>
+
+</body>
+</html>
