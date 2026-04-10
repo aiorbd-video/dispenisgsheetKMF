@@ -2,358 +2,368 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Oracle Applications - KMF Dispensing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>KMF Dispensing App</title>
     
-    <!-- html2canvas library for converting HTML to Image -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        /* Classic Oracle/Java Application UI Variables */
+        /* Modern Mobile-Friendly CSS Variables */
         :root {
-            --ora-bg: #E4E3DD;
-            --ora-panel: #F3F3F0;
-            --ora-blue: #3A5A8C;
-            --ora-light-blue: #B6C5D4;
-            --ora-border: #7F9DB9;
-            --ora-text: #000000;
-            --ora-btn-bg: #E0DFD9;
-            --ora-btn-border: #999999;
-            --ora-header: #003366;
-            --error-bg: #FFEEEE;
-            --error-border: #CC0000;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --error-bg: #fef2f2;
+            --error-text: #ef4444;
+            --error-border: #fca5a5;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: Tahoma, Arial, sans-serif;
-            background-color: var(--ora-bg);
-            color: var(--ora-text);
-            padding: 5px;
-            font-size: 12px; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: 14px;
             min-height: 100vh;
+            -webkit-touch-callout: none; 
+            overscroll-behavior-y: none;
+            padding-bottom: 20px;
         }
 
-        /* Fake Window Frame */
+        input, select, textarea { -webkit-user-select: auto; user-select: auto; font-family: inherit; }
+
         .app-window {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--ora-panel);
-            border: 2px solid #FFFFFF;
-            border-right-color: #888888;
-            border-bottom-color: #888888;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
+            width: 100%; max-width: 900px; margin: 0 auto; 
+            display: flex; flex-direction: column;
         }
 
-        /* Title Bar */
+        /* App Header */
         .title-bar {
-            background: linear-gradient(to right, #0A246A, #A6CAF0);
-            color: white;
-            padding: 6px 8px;
-            font-weight: bold;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            background: var(--primary); color: white;
+            padding: 15px 16px; font-weight: 600; font-size: 16px; 
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 1000;
         }
 
-        /* --- Interactive Menu Bar --- */
-        .menu-bar {
-            background: var(--ora-bg);
-            border-bottom: 1px solid #FFFFFF;
-            padding: 2px 5px;
-            display: flex;
-            flex-wrap: wrap;
-            font-size: 12px;
-            color: #000;
-            position: relative; 
+        /* Modern Navigation Menu */
+        .menu-bar { 
+            background: var(--card-bg); 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 8px 10px; display: flex; flex-wrap: wrap; gap: 5px;
+            box-shadow: var(--shadow-sm);
         }
-        
-        .menu-item {
-            position: relative;
-            padding: 4px 8px;
-            cursor: pointer;
-            user-select: none;
+        .menu-item { 
+            position: relative; padding: 8px 12px; cursor: pointer; 
+            border-radius: var(--radius-sm); font-weight: 500; color: var(--text-main);
+            transition: background 0.2s;
         }
-        
-        .menu-item:hover, .menu-item.active {
-            background: #000080;
-            color: white;
-        }
+        .menu-item:hover, .menu-item.active { background: var(--primary-light); color: var(--primary); }
         
         .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: var(--ora-panel);
-            border: 2px solid #FFFFFF;
-            border-right-color: #888888;
-            border-bottom-color: #888888;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            z-index: 9999;
-            min-width: 190px;
-            color: var(--ora-text);
-            padding: 2px;
+            display: none; position: absolute; top: 100%; left: 0; 
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md); z-index: 2000; min-width: 200px; 
+            padding: 5px 0; margin-top: 5px;
         }
-        
         .menu-item.active .dropdown { display: block; }
+        .dropdown-item { 
+            padding: 12px 16px; cursor: pointer; display: flex; 
+            justify-content: space-between; align-items: center;
+        }
+        .dropdown-item:hover { background: var(--bg-color); }
+        .dropdown-separator { height: 1px; background: var(--border-color); margin: 5px 0; }
+        .shortcut { color: var(--text-muted); font-size: 12px; }
+
+        .toolbar { 
+            padding: 12px 16px; display: flex; justify-content: space-between; 
+            align-items: center; flex-wrap: wrap; gap: 8px;
+        }
+        .toolbar-title { font-weight: 600; color: var(--text-main); font-size: 14px; }
+
+        .content-area { padding: 0 12px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Modern Cards for Panels */
+        .ora-panel { 
+            background: var(--card-bg); border-radius: var(--radius); 
+            box-shadow: var(--shadow-sm); padding: 20px 16px; border: 1px solid var(--border-color);
+        }
+        .ora-panel-title { 
+            color: var(--primary); font-weight: 600; font-size: 16px; 
+            margin-bottom: 16px; border-bottom: 2px solid var(--primary-light); 
+            padding-bottom: 8px; display: block;
+        }
+
+        .grid-2, .grid-3 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
         
-        .dropdown-item {
-            padding: 6px 15px 6px 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Modern Inputs */
+        input[type="text"], input[type="datetime-local"], select { 
+            padding: 12px; border: 1px solid var(--border-color); 
+            background-color: var(--card-bg); font-size: 16px; 
+            width: 100%; border-radius: var(--radius-sm); outline: none; transition: border 0.2s;
         }
         
-        .dropdown-item:hover {
-            background: #0A246A;
-            color: white;
+        input.interactive-field { 
+            cursor: pointer; color: var(--primary); font-weight: 600; 
+            background-color: var(--primary-light) !important; border: 1px solid var(--primary); 
         }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        input:disabled, select:disabled { background-color: var(--bg-color); color: var(--text-muted); opacity: 0.7; }
         
-        .dropdown-separator {
-            height: 1px;
-            background: #888888;
-            border-bottom: 1px solid #FFFFFF;
-            margin: 3px 2px;
+        .batch-input { text-transform: uppercase; font-weight: bold; color: var(--primary); letter-spacing: 0.5px;}
+        input.error-field, select.error-field { 
+            border-color: var(--error-border) !important; 
+            background-color: var(--error-bg) !important; 
         }
+
+        /* Modern Buttons */
+        .btn { 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            border-radius: var(--radius-sm); padding: 12px 16px; font-size: 15px; 
+            color: var(--text-main); cursor: pointer; font-weight: 600; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            text-align: center; transition: all 0.2s; touch-action: manipulation; 
+        }
+        .btn:active:not(:disabled) { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .shortcut { color: #666; font-size: 11px; padding-left: 15px;}
-        .dropdown-item:hover .shortcut { color: #CCC; }
-
-        /* Toolbar */
-        .toolbar {
-            background: var(--ora-bg);
-            border-top: 1px solid #888888;
-            border-bottom: 1px solid #888888;
-            padding: 6px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-primary { 
+            background: var(--primary); border-color: var(--primary); color: white; 
+            width: 100%; padding: 14px; font-size: 16px; box-shadow: var(--shadow-sm);
         }
-        .toolbar-title { font-weight: bold; color: var(--ora-blue); font-size: 12px; }
-
-        /* Main Content Area */
-        .content-area {
-            padding: 10px;
-            background: #FFFFFF;
-            border: 1px solid #888888;
-            border-top-color: #FFFFFF;
-            border-left-color: #FFFFFF;
-            margin: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Oracle Panel / Fieldset */
-        .ora-panel {
-            border: 1px solid var(--ora-border);
-            padding: 15px 10px 10px 10px;
-            position: relative;
-            background: #F9F9F9;
-            margin-top: 8px;
-        }
-        .ora-panel-title {
-            position: absolute;
-            top: -9px;
-            left: 10px;
-            background: #F9F9F9;
-            padding: 0 5px;
-            color: var(--ora-blue);
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .grid-2, .grid-3 { display: grid; gap: 10px; grid-template-columns: 1fr; }
-        .input-group { display: flex; flex-direction: column; }
-
-        label { font-size: 12px; color: var(--ora-text); margin-bottom: 4px; font-weight: normal; }
-
-        input, select {
-            padding: 6px 8px;
-            border: 1px solid #A9A9A9;
-            border-top-color: #888888;
-            border-left-color: #888888;
-            background-color: #FFFFFF;
-            font-family: Tahoma, Arial, sans-serif;
-            font-size: 13px;
-            width: 100%;
-        }
-
-        input:focus, select:focus {
-            background-color: #FFFFCC;
-            outline: none;
-            border-color: var(--ora-blue);
-        }
-
-        input:disabled, select:disabled {
-            background-color: #EFEFEF;
-            color: #666;
-            cursor: not-allowed;
-            border-color: #CCC;
-        }
-
-        .batch-input { text-transform: uppercase; font-weight: bold; color: var(--ora-blue); }
-
-        input.error-field, select.error-field {
-            border: 1px solid var(--error-border) !important;
-            background-color: var(--error-bg) !important;
-        }
-
-        /* Oracle Buttons */
-        .btn {
-            background: var(--ora-btn-bg);
-            border: 1px solid #FFFFFF;
-            border-right-color: #888888;
-            border-bottom-color: #888888;
-            padding: 6px 12px;
-            font-family: Tahoma, Arial, sans-serif;
-            font-size: 12px;
-            color: #000;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        .btn:active:not(:disabled) {
-            border: 1px solid #888888;
-            border-right-color: #FFFFFF;
-            border-bottom-color: #FFFFFF;
-            padding: 7px 11px 5px 13px;
-        }
-        .btn:disabled { color: #999; cursor: not-allowed; }
-
-        .btn-primary { background: #D4E6F1; border-color: #A9CCE3; width: 100%; padding: 8px;}
+        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
         
         .main-actions { margin-top: 5px; display: flex; gap: 10px; width: 100%;}
-        .export-actions { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; justify-content: flex-end;}
-        .export-actions .btn { flex: 1; min-width: 80px; }
+        .export-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 
-        /* Status Bar */
-        .status-bar {
-            background: var(--ora-bg);
-            border-top: 1px solid #888888;
-            padding: 5px 10px;
-            font-size: 11px;
-            color: #555;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            text-align: center;
+        /* Status & Toasts */
+        .status-bar { 
+            margin: 16px 12px; background: var(--card-bg); border-radius: var(--radius-sm); 
+            padding: 12px; font-size: 12px; color: var(--text-muted); 
+            display: flex; flex-direction: column; gap: 5px; text-align: center; 
+            border: 1px solid var(--border-color);
         }
 
-        /* Popups */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 3000;
+        #toast { 
+            visibility: hidden; min-width: 250px; margin-left: -125px; 
+            background-color: rgba(15, 23, 42, 0.9); color: #fff; text-align: center; 
+            border-radius: 30px; padding: 14px 20px; position: fixed; z-index: 9999; 
+            left: 50%; bottom: 30px; font-size: 14px; box-shadow: var(--shadow-md); 
+            opacity: 0; transition: opacity 0.3s, bottom 0.3s; 
         }
-        .popup {
-            background: var(--ora-panel); border: 2px solid #FFFFFF; border-right-color: #888888; border-bottom-color: #888888;
-            padding: 2px; width: 90%; max-width: 320px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-        }
-        .popup-header { background: #0A246A; color: white; padding: 5px 8px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between;}
-        .popup-content { padding: 15px; background: #FFFFFF; text-align: center; }
-        .popup-content h3 { margin-bottom: 8px; font-size: 14px; color: var(--error-border);}
-        .popup-content p { margin-bottom: 15px; font-size: 12px; line-height: 1.4;}
-        .popup-content .btn { width: 100px; }
-        
-        .modal-input { margin-bottom: 15px; width: 100%; text-transform: uppercase; text-align: center; font-weight: bold;}
+        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; background: #FFFFFF; border: 1px solid var(--ora-border); margin-top: 5px; table-layout: fixed; }
-        th, td { padding: 6px 4px; border: 1px solid var(--ora-border); font-size: 10px; text-align: left; word-wrap: break-word; vertical-align: middle;}
-        th { background: #D3DCE3; color: var(--ora-header); font-weight: bold; border-bottom: 2px solid #99B4D1; text-align: center; font-size: 10px;}
+        /* Modern Modals */
+        .overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);
+            display: none; justify-content: center; align-items: center; z-index: 3000; 
+        }
+        .popup { 
+            background: var(--card-bg); border-radius: var(--radius); 
+            width: 92%; max-width: 360px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            overflow: hidden; animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        th:nth-child(1), td:nth-child(1) { width: 33%; }
-        th:nth-child(2), td:nth-child(2) { width: 20%; text-align: center; }
-        th:nth-child(3), td:nth-child(3) { width: 20%; text-align: center; }
-        th:nth-child(4), td:nth-child(4) { width: 27%; text-align: center; font-weight: bold;}
-        .section-row { background: #E8EEF7 !important; color: var(--ora-header); font-weight: bold; text-transform: uppercase; font-size: 10px;}
+        .popup-header { 
+            background: var(--bg-color); color: var(--text-main); 
+            padding: 16px 20px; font-weight: 600; font-size: 16px; 
+            display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color);
+        }
+        .popup-content { padding: 20px; text-align: center; }
+        .popup-content h3 { margin-bottom: 8px; font-size: 18px; color: var(--error-text);}
+        .popup-content p { margin-bottom: 20px; font-size: 14px; color: var(--text-muted);}
+        .modal-input { margin-bottom: 20px; text-align: center; }
         
+        .mat-checkbox-item { 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 12px; 
+            font-size: 15px; text-align: left; padding: 8px 5px;
+        }
+        .mat-checkbox-item input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); }
+        .custom-mat-input { width: 100%; display: none; margin-top: 8px; }
+
+        /* ========================================= */
+        /* SCROLLABLE A4 PAGE VIEWER STYLING         */
+        /* ========================================= */
         #resultArea { display: none; }
+        
+        /* The Fixed Viewport Container for scrolling */
+        .log-view-container {
+            width: 100%;
+            max-height: 65vh; /* Responsive Fixed Height */
+            overflow: auto;
+            background: #cbd5e1; /* Grey background like a desk */
+            padding: 20px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px inset var(--border-color);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
 
-        /* Setup specifically for PNG Export */
-        #captureArea { background-color: #FFFFFF; padding: 0; }
-        #pngHeader { display: none; margin-bottom: 10px; border: 1px solid var(--ora-border); padding: 10px; background: #F9F9F9; }
-        .gmp-header-title { font-size: 14px; font-weight: bold; color: var(--ora-header); text-align: center; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid var(--ora-border); padding-bottom: 5px;}
-        .gmp-header-info { display: flex; flex-direction: column; gap: 5px; font-size: 11px; font-weight: bold; color: #000; }
-        .gmp-header-info span { color: var(--ora-blue); font-weight: normal; }
+        /* The A4 Page Inside the Viewport */
+        #captureArea { 
+            background-color: #ffffff; 
+            width: 100%;
+            max-width: 794px; /* Exact A4 width proportion */
+            min-height: 1123px; /* Exact A4 height proportion */
+            margin: 0 auto; /* Centers the paper in boro screen */
+            padding: 40px; /* Standard A4 Margin */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
 
-        /* Ad & Footer */
-        .app-footer { margin-top: 10px; text-align: center; padding: 10px; background: var(--ora-panel); border: 1px solid #888888; }
-        .powered-by { font-size: 11px; margin-bottom: 10px; font-weight: bold; }
-        .powered-by a { color: var(--ora-blue); text-decoration: none; }
+        /* A4 Page Header */
+        #pngHeader { 
+            display: block; /* Always visible now on screen as document header */
+            margin-bottom: 20px; 
+            border-bottom: 2px solid var(--text-main); 
+            padding-bottom: 15px; 
+        }
+        .gmp-header-title { 
+            font-size: 20px; font-weight: bold; color: var(--text-main); 
+            text-align: center; margin-bottom: 15px; text-transform: uppercase; 
+        }
+        .gmp-header-info { 
+            display: flex; justify-content: space-between; 
+            font-size: 14px; font-weight: 600; color: var(--text-muted); 
+        }
+        .gmp-header-info span { color: var(--text-main); }
+
+        /* Table Styling specifically for A4 output */
+        table { width: 100%; border-collapse: collapse; background: #ffffff; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid var(--border-color); font-size: 13px; text-align: left; vertical-align: middle;}
+        th { background: #f8fafc; color: var(--text-main); font-weight: bold; text-transform: uppercase; font-size: 12px; border-bottom: 2px solid var(--border-color);}
+        th:nth-child(1), td:nth-child(1) { width: 35%; } 
+        th:nth-child(2), td:nth-child(2) { width: 20%; } 
+        th:nth-child(3), td:nth-child(3) { width: 20%; } 
+        th:nth-child(4), td:nth-child(4) { width: 25%; font-weight: bold; color: var(--text-main);}
+        .section-row { background: var(--primary-light) !important; color: var(--primary); font-weight: bold; text-transform: uppercase; font-size: 12px; border-top: 2px solid var(--primary-light);}
+
+        .app-footer { margin-top: 10px; text-align: center; padding: 20px; font-size: 12px; color: var(--text-muted); }
+        .app-footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .highlight-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 12px; }
+        .highlight-alert label { color: #b91c1c; font-weight: 600; }
 
         @media (min-width: 600px) {
-            .grid-2 { grid-template-columns: 1fr 1fr; }
+            .grid-2 { grid-template-columns: 1fr 1fr; } 
             .grid-3 { grid-template-columns: repeat(3, 1fr); }
-            
-            .input-group.horizontal { flex-direction: row; align-items: center; justify-content: space-between; }
-            .input-group.horizontal label { width: 130px; margin-bottom: 0; }
-            
             .status-bar { flex-direction: row; justify-content: space-between; text-align: left; }
-            .btn-primary { width: 200px; }
-            .export-actions { justify-content: flex-end; flex-wrap: nowrap; }
-            .export-actions .btn { flex: unset; width: auto; }
-            
-            .gmp-header-info { flex-direction: row; justify-content: space-between; }
-            th, td { font-size: 11px; padding: 6px; }
+            .btn-primary { width: auto; min-width: 250px; }
+            .export-actions { display: flex; justify-content: flex-end; } .export-actions .btn { width: auto; min-width: 120px; }
+            th, td { font-size: 14px; padding: 12px; }
         }
 
+        /* Mobile specific adjustments for the A4 view */
+        @media (max-width: 600px) {
+            #captureArea {
+                padding: 20px; /* Reduced margin for mobile screen real estate */
+                min-height: 800px; 
+            }
+            .gmp-header-info { flex-direction: column; gap: 8px; }
+        }
+
+        /* PRINT STYLES - Strips scrolling & background for true physical print */
         @media print {
             body { background: white; padding: 0; margin: 0; }
-            .title-bar, .menu-bar, .toolbar, .ora-panel:not(#resultArea), .main-actions, .status-bar, .app-footer { display: none !important; }
-            .app-window { box-shadow: none; border: none; max-width: 100%; width: 100%; }
-            .content-area { border: none; padding: 0; margin: 0; }
-            #resultArea { display: block !important; border: none; padding: 0; margin: 0;}
-            table { border: 1px solid #000; }
-            th, td { border: 1px solid #000; font-size: 10px; padding: 4px; }
-            .section-row { background: #EEEEEE !important; color: #000; -webkit-print-color-adjust: exact; }
-            #pngHeader { display: block; border: 1px solid #000; background: white; }
+            .title-bar, .menu-bar, .toolbar, .ora-panel:not(#resultArea), .main-actions, .status-bar, .app-footer, .export-actions { display: none !important; }
+            .app-window { max-width: 100%; width: 100%; }
+            .content-area { padding: 0; margin: 0; } 
+            
+            #resultArea { display: block !important; border: none; box-shadow: none; padding: 0; margin: 0;}
+            
+            .log-view-container { max-height: none !important; overflow: visible !important; background: white; padding: 0; border: none; box-shadow: none;}
+            #captureArea { max-width: 100%; width: 100%; min-height: auto; box-shadow: none; padding: 0; margin: 0;}
+            
+            table { border: 1px solid #000; min-width: auto;} 
+            th, td { border: 1px solid #000; font-size: 12px; padding: 8px; color: #000 !important; }
+            th { background: #eee !important; -webkit-print-color-adjust: exact; }
+            .section-row { background: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+            #pngHeader { border-bottom: 2px solid #000;}
+            .gmp-header-title, .gmp-header-info, .gmp-header-info span { color: #000;}
             .gmp-header-info { flex-direction: row; justify-content: space-between; }
         }
     </style>
 </head>
 <body>
 
+<div id="toast">Message goes here</div>
+
 <!-- Alert Popup -->
 <div class="overlay" id="customAlert">
     <div class="popup">
         <div class="popup-header">
             <span>System Message</span>
-            <span style="cursor:pointer; padding:0 5px;" onclick="closeAlertMsg()">X</span>
+            <span style="cursor:pointer; font-size: 18px;" onclick="document.getElementById('customAlert').style.display='none'">&times;</span>
         </div>
         <div class="popup-content">
             <h3 id="alertTitle">Error</h3>
             <p id="alertMsg">Please fill in all required fields.</p>
-            <button class="btn" onclick="closeAlertMsg()" style="width: 100%;">OK</button>
+            <button class="btn btn-primary" id="closeAlertBtn">Acknowledge</button>
         </div>
     </div>
 </div>
 
-<!-- Input Modal (For Search and Delete) -->
+<!-- Query Modal -->
 <div class="overlay" id="inputModal">
     <div class="popup">
         <div class="popup-header">
             <span id="inputModalTitle">Query Mode</span>
-            <span style="cursor:pointer; padding:0 5px;" onclick="closeInputModal()">X</span>
+            <span style="cursor:pointer; font-size: 18px;" onclick="closeInputModal()">&times;</span>
         </div>
         <div class="popup-content">
-            <h3 id="inputModalHeading" style="color:var(--ora-header);">Enter Batch Number</h3>
+            <h3 id="inputModalHeading" style="color:var(--text-main);">Enter Batch Number</h3>
             <p id="inputModalDesc">Type or select batch number to proceed.</p>
             <input type="text" id="modalBatchInput" class="modal-input" list="batchList" placeholder="e.g. BATCH-01">
             <datalist id="batchList"></datalist>
             <div style="display:flex; justify-content:center; gap:10px;">
-                <button class="btn" onclick="submitModal()" style="background:#D4E6F1; flex:1;">OK</button>
-                <button class="btn" onclick="closeInputModal()" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" id="modalOkBtn" onclick="submitModal()" style="flex: 1;">Execute</button>
+                <button class="btn" onclick="closeInputModal()" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dispensed Material Checkbox Modal -->
+<div class="overlay" id="materialModal">
+    <div class="popup" style="max-width: 400px;">
+        <div class="popup-header">
+            <span>Select Materials</span>
+            <span style="cursor:pointer; font-size: 18px;" onclick="closeMaterialModal()">&times;</span>
+        </div>
+        <div class="popup-content" style="text-align: left; padding: 20px;">
+            <p style="color:var(--text-muted); font-weight:600; margin-bottom:12px;">Materials for Staging:</p>
+            
+            <div id="materialCheckboxes">
+                <label class="mat-checkbox-item"><input type="checkbox" value="Aluminum canister" class="mat-chk"> Aluminum canister</label>
+                <label class="mat-checkbox-item"><input type="checkbox" value="Metered valve" class="mat-chk"> Metered valve</label>
+                <label class="mat-checkbox-item"><input type="checkbox" value="Capsule shell" class="mat-chk"> Capsule shell</label>
+                <label class="mat-checkbox-item"><input type="checkbox" value="Excipients" class="mat-chk"> Excipients</label>
+                <label class="mat-checkbox-item"><input type="checkbox" value="API" class="mat-chk"> API</label>
+                
+                <label class="mat-checkbox-item" id="othersLabel" style="flex-wrap: wrap;">
+                    <span style="display:flex; align-items:center; gap:12px;"><input type="checkbox" value="Others" class="mat-chk" id="othersChk"> Others</span>
+                    <input type="text" id="othersText" class="custom-mat-input" placeholder="Type custom material name...">
+                </label>
+            </div>
+            
+            <div style="display:flex; justify-content:center; gap:10px; margin-top: 24px;">
+                <button class="btn btn-primary" onclick="saveMaterialSelection()" style="flex: 1;">Confirm</button>
+                <button class="btn" onclick="closeMaterialModal()" style="flex: 1;">Cancel</button>
             </div>
         </div>
     </div>
@@ -361,147 +371,151 @@
 
 <div class="app-window">
     <div class="title-bar">
-        <span>☕</span>
-        <span>Oracle Applications - Java™</span>
+        <span>💊</span>
+        <span>KMF Dispensing Center</span>
     </div>
     
     <!-- INTERACTIVE MENU BAR -->
     <div class="menu-bar" id="menuBar">
-        <div class="menu-item">
-            <u>F</u>ile
+        <div class="menu-item" data-menu="file">
+            File
             <div class="dropdown">
-                <div class="dropdown-item" onclick="window.location.reload()"><span>New / Clear Form</span><span class="shortcut">Ctrl+N</span></div>
+                <div class="dropdown-item" onclick="window.location.reload()"><span>New / Clear Form</span></div>
                 <div class="dropdown-separator"></div>
-                <div class="dropdown-item" onclick="appSaveRecord()"><span>Save / Update Record</span><span class="shortcut">Ctrl+S</span></div>
+                <div class="dropdown-item" onclick="appSaveRecord()"><span>Save / Update Record</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-menu="edit">
+            Manage
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="openInputModal('search')"><span>Search / Load Batch</span></div>
                 <div class="dropdown-separator"></div>
-                <div class="dropdown-item" onclick="window.print()"><span>Print Output</span><span class="shortcut">Ctrl+P</span></div>
+                <div class="dropdown-item" onclick="openInputModal('delete')"><span>Delete Batch Record</span></div>
             </div>
         </div>
-        <div class="menu-item">
-            <u>E</u>dit
+        <div class="menu-item" data-menu="tools">
+            Export
             <div class="dropdown">
-                <div class="dropdown-item" onclick="openInputModal('search')"><span>Search / Load Batch</span><span class="shortcut">Ctrl+F</span></div>
-                <div class="dropdown-separator"></div>
-                <div class="dropdown-item" onclick="openInputModal('delete')"><span>Delete Batch Record</span><span class="shortcut">Del</span></div>
+                <div class="dropdown-item" onclick="scrollToResult()"><span>View Generated Log</span></div>
+                <div class="dropdown-item" onclick="document.getElementById('downloadBtn').click()"><span>Export as Image</span></div>
+                <div class="dropdown-item" onclick="document.getElementById('shareImageBtn').click()"><span>Share Image</span></div>
+                <div class="dropdown-item" onclick="document.getElementById('sendDataBtn').click()"><span>Send Text Data</span></div>
             </div>
         </div>
-        <div class="menu-item">
-            <u>V</u>iew
+        <div class="menu-item" data-menu="help">
+            Help
             <div class="dropdown">
-                <div class="dropdown-item" onclick="scrollToResult()"><span>View Master Log Output </span></div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <u>T</u>ools
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="triggerDownload()"><span>Export as Image</span></div>
-                <div class="dropdown-item" onclick="triggerShare()"><span>Share Image</span></div>
-                <div class="dropdown-item" onclick="triggerDataSend()"><span>Send Text Data</span></div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <u>H</u>elp
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="showAboutInfo()"><span>About System</span></div>
+                <div class="dropdown-item" onclick="showAboutInfo()"><span>About App</span></div>
             </div>
         </div>
     </div>
 
     <div class="toolbar">
-        <div class="toolbar-title">Kashor Multiflex Facility</div>
-        <div class="toolbar-title" id="lockStatus" style="font-weight:normal; color:var(--ora-text);">✏️ Status: Editable</div>
+        <div class="toolbar-title">Data Entry Form</div>
+        <div class="toolbar-title" id="lockStatus" style="font-weight:normal; color:var(--text-muted);">🟢 Status: Editable</div>
     </div>
 
     <div class="content-area">
         <div class="ora-panel">
-            <div class="ora-panel-title">1. Product & Dispensing Details</div>
+            <span class="ora-panel-title">1. Product & Schedule Details</span>
             <div class="grid-2">
-                <div class="input-group horizontal">
+                <div class="input-group">
                     <label>Product Name</label>
-                    <input type="text" id="prodName" class="req-field">
+                    <input type="text" id="prodName" class="req-field" placeholder="Enter Product Name">
                 </div>
-                <div class="input-group horizontal">
+                <div class="input-group">
                     <label>Batch Number</label>
-                    <input type="text" id="batchNo" class="req-field batch-input">
+                    <input type="text" id="batchNo" class="req-field batch-input" placeholder="e.g. BATCH-01">
                 </div>
-                <div class="input-group horizontal">
-                    <label>Dosage Form (Area)</label>
+                <div class="input-group">
+                    <label>Dosage Form</label>
                     <select id="prodType" class="req-field">
                         <option value="DPI">DPI (Dry Powder Inhaler)</option>
-                        <option value="MDI">MDI (Metered Dose Inhaler)</option>
+                        <option value="MDI_1">MDI (1 Dispensing)</option>
+                        <option value="MDI_2">MDI (2 Dispensing)</option>
                     </select>
                 </div>
-                <div class="input-group horizontal"><label>Booth Start</label><input type="datetime-local" id="boothStart" class="req-field"></div>
-                <div class="input-group horizontal"><label>Booth End</label><input type="datetime-local" id="boothEnd" class="req-field"></div>
+                <div class="input-group"><label>Booth Start</label><input type="datetime-local" id="boothStart" class="req-field"></div>
+                <div class="input-group"><label>Booth End</label><input type="datetime-local" id="boothEnd" class="req-field"></div>
                 
-                <div class="input-group horizontal"><label>Dispense 1 Start</label><input type="datetime-local" id="dispStart" class="req-field"></div>
-                <div class="input-group horizontal"><label>Dispense 1 End</label><input type="datetime-local" id="dispEnd" class="req-field"></div>
+                <div class="input-group"><label>Dispense 1 Start</label><input type="datetime-local" id="dispStart" class="req-field"></div>
+                <div class="input-group"><label>Dispense 1 End</label><input type="datetime-local" id="dispEnd" class="req-field"></div>
                 
-                <!-- Extra Fields for MDI (Hidden by default) -->
-                <div class="input-group horizontal mdi-field" style="display:none;"><label>Dispense 2 Start</label><input type="datetime-local" id="dispStart2"></div>
-                <div class="input-group horizontal mdi-field" style="display:none;"><label>Dispense 2 End</label><input type="datetime-local" id="dispEnd2"></div>
+                <div class="input-group">
+                    <label>Dispensed Material 1</label>
+                    <input type="text" id="mat1" class="interactive-field" placeholder="Tap to select..." readonly onclick="openMaterialModal(1)">
+                </div>
+                
+                <div class="input-group mdi-field" style="display:none;"><label>Dispense 2 Start</label><input type="datetime-local" id="dispStart2"></div>
+                <div class="input-group mdi-field" style="display:none;"><label>Dispense 2 End</label><input type="datetime-local" id="dispEnd2"></div>
+                
+                <div class="input-group mdi-field" style="display:none;">
+                    <label>Dispensed Material 2</label>
+                    <input type="text" id="mat2" class="interactive-field" placeholder="Tap to select..." readonly onclick="openMaterialModal(2)">
+                </div>
 
-                <!-- Manual Room Clean Start -->
-                <div class="input-group horizontal" style="grid-column: 1 / -1; background:#E8EEF7; padding:5px; border:1px solid #B6C5D4; margin-top:5px;">
-                    <label style="font-weight:bold; color:var(--ora-header);">Room Full Cleaning Start</label>
-                    <input type="datetime-local" id="roomCleanStart" class="req-field" style="max-width:300px;">
+                <div class="input-group highlight-alert" style="grid-column: 1 / -1; margin-top: 8px;">
+                    <label>Room Full Cleaning Start</label>
+                    <input type="datetime-local" id="roomCleanStart" class="req-field">
                 </div>
             </div>
         </div>
 
         <div class="ora-panel">
-            <div class="ora-panel-title">2. Dispensing Operation Personnel</div>
+            <span class="ora-panel-title">2. Operation Personnel</span>
             <div class="grid-3">
-                <div class="input-group"><label>Booth Operator</label><input type="text" id="boothOperator" class="req-field"></div>
-                <div class="input-group"><label>Dispensing Operator</label><input type="text" id="dispOperator" class="req-field"></div>
-                <div class="input-group"><label>Staging Operator</label><input type="text" id="stagingOperator" class="req-field"></div>
+                <div class="input-group"><label>Booth Operator</label><input type="text" id="boothOperator" class="req-field" placeholder="Operator Name"></div>
+                <div class="input-group"><label>Dispensing Operator</label><input type="text" id="dispOperator" class="req-field" placeholder="Operator Name"></div>
+                <div class="input-group"><label>Staging Operator</label><input type="text" id="stagingOperator" class="req-field" placeholder="Operator Name"></div>
             </div>
         </div>
 
         <div class="ora-panel">
-            <div class="ora-panel-title">3. Full Cleaning Personnel</div>
+            <span class="ora-panel-title">3. Full Cleaning Personnel</span>
             <div class="grid-3">
-                <div class="input-group"><label>Clean Person 1 (Room)</label><input type="text" id="cleanerRoom" class="req-field"></div>
-                <div class="input-group"><label>Clean Person 2 (Booth/Bal/PPE)</label><input type="text" id="cleanerBooth" class="req-field"></div>
-                <div class="input-group"><label>Clean Person 3 (Eth/PB/Acces)</label><input type="text" id="cleanerEth" class="req-field"></div>
+                <div class="input-group"><label>Clean Person 1 (Room)</label><input type="text" id="cleanerRoom" class="req-field" placeholder="Cleaner Name"></div>
+                <div class="input-group"><label>Clean Person 2 (Booth/Bal/PPE)</label><input type="text" id="cleanerBooth" class="req-field" placeholder="Cleaner Name"></div>
+                <div class="input-group"><label>Clean Person 3 (Eth/PB/Acc)</label><input type="text" id="cleanerEth" class="req-field" placeholder="Cleaner Name"></div>
             </div>
         </div>
 
         <div class="main-actions">
-            <button class="btn btn-primary" id="generateBtn">Execute Program & Build Data</button>
+            <button class="btn btn-primary" id="generateBtn">Generate Master Log</button>
         </div>
 
         <div class="ora-panel" id="resultArea">
-            <div class="ora-panel-title">Output: KMF Dispensing - Operation and Cleaning Details</div>
+            <span class="ora-panel-title">Output: Master Log Details</span>
             <div class="export-actions">
-                <button class="btn" onclick="triggerDownload()">Export Image</button>
-                <button class="btn" onclick="triggerShare()">Share Image</button>
-                <button class="btn" onclick="triggerDataSend()">Send Data</button>
+                <button class="btn" id="downloadBtn">Save Image</button>
+                <button class="btn" id="shareImageBtn">Share Image</button>
+                <button class="btn" id="sendDataBtn">Copy Text</button>
                 <button class="btn" onclick="window.print()">Print</button>
             </div>
             
-            <div id="captureArea">
-                <div id="pngHeader">
-                    <div class="gmp-header-title">Dispensing Operation & Full Cleaning Details</div>
-                    <div class="gmp-header-info">
-                        <div>Product: <span id="hdrProdName"></span></div>
-                        <div>Batch No: <span id="hdrBatchNo"></span></div>
-                        <div id="hdrDate">Date: </div>
+            <!-- FIXED A4 PAGE VIEWER CONTAINER -->
+            <div class="log-view-container">
+                <div id="captureArea">
+                    <div id="pngHeader">
+                        <div class="gmp-header-title">Dispensing & Full Cleaning Log</div>
+                        <div class="gmp-header-info">
+                            <div>Product: <span id="hdrProdName"></span></div>
+                            <div>Batch No: <span id="hdrBatchNo"></span></div>
+                            <div id="hdrDate">Date: </div>
+                        </div>
                     </div>
+                    
+                    <table id="logTable">
+                        <thead><tr><th>Process Name</th><th>Start Time</th><th>End Time</th><th>Performed By</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                
-                <table id="logTable">
-                    <thead><tr><th>Process Name</th><th>Start Time</th><th>End Time</th><th>Performed By</th></tr></thead>
-                    <tbody></tbody>
-                </table>
             </div>
         </div>
     </div>
 
-    <!-- Ad & Footer Area -->
     <div class="app-footer">
-        <div class="powered-by">Powered by <a href="https://wa.me/8801910254667" target="_blank">Ratul Hasan</a></div>
-        <div class="ad-container">
+        <div>Powered by <a href="https://wa.me/8801910254667" target="_blank">Ratul Hasan</a></div>
+        <div class="ad-container" style="margin-top: 15px;">
             <script type="text/javascript">
               atOptions = {
                 'key' : 'e8d156b2876798842923e2f7475b7419',
@@ -516,53 +530,21 @@
     </div>
 
     <div class="status-bar">
-        <span id="statusText">Ready</span>
-        <span>Oracle E-Business Suite | KMF_Dispensing_Manager</span>
+        <span id="statusText">System Ready</span>
+        <span>KMF_Dispensing_Manager v2.0</span>
     </div>
 </div>
 
 <script>
-    // --- Global State ---
-    let currentGeneratedRows = null;
-    let modalActionType = ''; // 'search' or 'delete'
-    const STORAGE_PREFIX = "ORA_BATCH_";
+    // Android Toast
+    function showToast(message) {
+        if (window.Android && window.Android.showToast) { window.Android.showToast(message); return; }
+        const toast = document.getElementById("toast");
+        toast.innerText = message; toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
 
-    // --- Core Helpers ---
-    const addMins = (date, mins) => new Date(date.getTime() + mins * 60000);
-    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const formatTime = (d) => {
-        if (!d || isNaN(d.getTime())) return '-';
-        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    };
-    const formatDatePharma = (d) => {
-        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
-    };
-    const setStatus = (msg) => document.getElementById('statusText').innerText = msg;
-    const scrollToResult = () => {
-        const res = document.getElementById('resultArea');
-        if(res.style.display === 'block') res.scrollIntoView({ behavior: 'smooth' });
-        else showMsg("Notice", "Please Select Batch number first or Create new.", "error");
-    };
-
-    // --- UI Interactions ---
-    // MDI Toggle Logic
-    document.getElementById('prodType').addEventListener('change', function() {
-        const isMDI = this.value === 'MDI';
-        document.querySelectorAll('.mdi-field').forEach(el => {
-            el.style.display = isMDI ? 'flex' : 'none';
-            const input = el.querySelector('input');
-            if (isMDI) {
-                input.classList.add('req-field');
-            } else {
-                input.classList.remove('req-field');
-                input.classList.remove('error-field');
-                input.value = '';
-            }
-        });
-    });
-
-    // Menu System
+    // Menu Bar Logic
     document.addEventListener('click', function(e) {
         document.querySelectorAll('.menu-item').forEach(item => {
             if (!item.contains(e.target)) item.classList.remove('active');
@@ -572,442 +554,389 @@
         }
     });
 
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); appSaveRecord(); }
-        if (e.ctrlKey && e.key.toLowerCase() === 'f') { e.preventDefault(); openInputModal('search'); }
-        if (e.ctrlKey && e.key.toLowerCase() === 'n') { e.preventDefault(); window.location.reload(); }
-    });
+    document.addEventListener('DOMContentLoaded', () => {
 
-    // Custom Alert
-    const alertBox = document.getElementById('customAlert');
-    const alertTitle = document.getElementById('alertTitle');
-    const alertMsg = document.getElementById('alertMsg');
-    
-    window.showMsg = (title, msg, type="error") => {
-        alertTitle.innerText = title;
-        alertMsg.innerHTML = msg;
-        alertTitle.style.color = (type === "success") ? "#006600" : "var(--error-border)";
-        alertBox.style.display = 'flex';
-        setStatus(msg.replace(/<[^>]*>?/gm, ''));
-    };
-    window.closeAlertMsg = () => alertBox.style.display = 'none';
-
-    window.showAboutInfo = () => {
-        showMsg("About System", "<b>Oracle Java (Java™) is used to develop powerful backend web applications that handle data, business logic, and server-side processing. </b></br></br><b>All Rights Reserved Kashor Multiflex Facility(KMF)</b><br><br>Version 1.0.9<br>Powered by Ratul Hasan.", "success");
-    }
-
-    // --- Form State Management (Locking) ---
-    const setFormState = (isLocked) => {
-        document.querySelectorAll('.req-field').forEach(el => el.disabled = isLocked);
-        document.getElementById('generateBtn').disabled = isLocked;
+        const addMins = (date, mins) => new Date(date.getTime() + mins * 60000);
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const formatTime = (d) => {
+            if (!d || isNaN(d.getTime())) return '-';
+            return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        };
+        const formatDatePharma = (d) => {
+            const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
+        };
+        const setStatus = (msg) => { document.getElementById('statusText').innerText = msg; showToast(msg); };
         
-        const lockStatus = document.getElementById('lockStatus');
-        if(isLocked) {
-            lockStatus.innerText = "🔒 Status: READ-ONLY (Locked)";
-            lockStatus.style.color = "var(--error-border)";
-            lockStatus.style.fontWeight = "bold";
-        } else {
-            lockStatus.innerText = "✏️ Status: Editable";
-            lockStatus.style.color = "var(--ora-text)";
-            lockStatus.style.fontWeight = "normal";
-        }
-    };
-
-    // Auto-Uppercase & Error clearing
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', function() { 
-            this.classList.remove('error-field'); 
-            currentGeneratedRows = null; 
-        });
-    });
-    document.getElementById('batchNo').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-    document.getElementById('modalBatchInput').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-
-    // --- Storage & Datalist ---
-    const loadDatalist = () => {
-        const datalist = document.getElementById('batchList');
-        datalist.innerHTML = '';
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith(STORAGE_PREFIX)) {
-                const option = document.createElement('option');
-                option.value = key.replace(STORAGE_PREFIX, '');
-                datalist.appendChild(option);
-            }
-        }
-    };
-    document.addEventListener('DOMContentLoaded', loadDatalist);
-
-    // --- CUSTOM INPUT MODAL (Search & Delete) ---
-    const inputModal = document.getElementById('inputModal');
-    
-    window.openInputModal = (type) => {
-        modalActionType = type;
-        const title = document.getElementById('inputModalTitle');
-        const heading = document.getElementById('inputModalHeading');
-        const input = document.getElementById('modalBatchInput');
-        
-        input.value = ''; 
-        
-        if(type === 'search') {
-            title.innerText = 'Query Mode';
-            heading.innerText = 'Search / Load Record';
-            heading.style.color = 'var(--ora-header)';
-        } else if(type === 'delete') {
-            title.innerText = 'Delete Record';
-            heading.innerText = 'Warning: Delete Action';
-            heading.style.color = 'var(--error-border)';
-        }
-        
-        inputModal.style.display = 'flex';
-        setTimeout(() => input.focus(), 100);
-    };
-
-    window.closeInputModal = () => {
-        inputModal.style.display = 'none';
-    };
-
-    window.submitModal = () => {
-        const batchVal = document.getElementById('modalBatchInput').value.trim().toUpperCase();
-        if(!batchVal) {
-            alert("Please enter a Batch Number.");
-            return;
-        }
-        if(modalActionType === 'search') {
-            executeSearchLoad(batchVal);
-        } else if(modalActionType === 'delete') {
-            executeDelete(batchVal);
-        }
-        closeInputModal();
-    };
-
-    // --- Search Logic ---
-    const executeSearchLoad = (searchVal) => {
-        const data = JSON.parse(localStorage.getItem(STORAGE_PREFIX + searchVal));
-        if(data) {
-            document.getElementById('prodName').value = data.prodName || "";
-            document.getElementById('batchNo').value = data.batchNo || "";
-            
-            const prodTypeDropdown = document.getElementById('prodType');
-            prodTypeDropdown.value = data.prodType || "DPI";
-            prodTypeDropdown.dispatchEvent(new Event('change')); // Trigger MDI toggle
-            
-            document.getElementById('boothStart').value = data.boothStart || "";
-            document.getElementById('boothEnd').value = data.boothEnd || "";
-            document.getElementById('dispStart').value = data.dispStart || "";
-            document.getElementById('dispEnd').value = data.dispEnd || "";
-            document.getElementById('dispStart2').value = data.dispStart2 || "";
-            document.getElementById('dispEnd2').value = data.dispEnd2 || "";
-            document.getElementById('roomCleanStart').value = data.roomCleanStart || "";
-            
-            document.getElementById('boothOperator').value = data.boothOperator || "";
-            document.getElementById('dispOperator').value = data.dispOperator || "";
-            document.getElementById('stagingOperator').value = data.stagingOperator || "";
-            document.getElementById('cleanerRoom').value = data.cleanerRoom || "";
-            document.getElementById('cleanerBooth').value = data.cleanerBooth || "";
-            document.getElementById('cleanerEth').value = data.cleanerEth || "";
-            
-            document.getElementById("hdrProdName").innerText = data.prodName || "-";
-            document.getElementById("hdrBatchNo").innerText = data.batchNo || "-";
-            if(data.boothStart) {
-                document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(new Date(data.boothStart));
-            }
-
-            if (data.logRows) {
-                currentGeneratedRows = data.logRows;
-                renderTable(data.logRows);
-            } else {
-                document.getElementById('generateBtn').click();
-            }
-
-            const timestamp = data.saveTimestamp || 0; 
-            const ageMs = Date.now() - timestamp;
-            const lockTimeMs = 30 * 60 * 1000;
-
-            if (ageMs > lockTimeMs) {
-                setFormState(true);
-                showMsg("Query Executed", `Record retrieved. Status: READ-ONLY (Locked).`, "error");
-            } else {
-                setFormState(false);
-                const minsLeft = Math.floor((lockTimeMs - ageMs) / 60000);
-                showMsg("Query Executed", `Record retrieved. Editable for ${minsLeft} more minutes.`, "success");
-            }
-        } else {
-            showMsg("Query Error", "FRM-40301: Query caused no records to be retrieved.", "error");
-        }
-    };
-
-    // --- Delete Logic ---
-    const executeDelete = (searchVal) => {
-        if(localStorage.getItem(STORAGE_PREFIX + searchVal) !== null) {
-            if(confirm(`Are you sure you want to completely remove BATCH: ${searchVal}?`)) {
-                localStorage.removeItem(STORAGE_PREFIX + searchVal);
-                loadDatalist();
-                showMsg("Record Deleted", `FRM-40400: Record for ${searchVal} deleted.`, "success");
-            }
-        } else {
-            showMsg("Delete Error", "Record not found in database.", "error");
-        }
-    };
-
-    // --- RENDER TABLE FUNCTION ---
-    const renderTable = (rowsData) => {
-        const tbody = document.querySelector("#logTable tbody");
-        tbody.innerHTML = ""; 
-        rowsData.forEach(r => {
-            const tr = document.createElement("tr");
-            if (r.isSection) {
-                tr.innerHTML = `<td colspan="4" class="section-row">${r.task}</td>`;
-            } else {
-                tr.innerHTML = `
-                    <td>${r.task}</td>
-                    <td>${r.startStr || '-'}</td>
-                    <td>${r.endStr || '-'}</td>
-                    <td style="font-weight:bold; color:var(--ora-blue);">${r.by}</td>
-                `;
-            }
-            tbody.appendChild(tr);
-        });
-        document.getElementById("resultArea").style.display = "block";
-    };
-
-    // --- SAVE / UPDATE Logic ---
-    window.appSaveRecord = () => {
-        if(document.getElementById('generateBtn') && document.getElementById('generateBtn').disabled) {
-            return showMsg("Error", "Record is locked and cannot be saved.", "error");
-        }
-
-        const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
-        if (!batchNo) {
-            document.getElementById('batchNo').classList.add('error-field');
-            showMsg("FRM-40202", "Field must be entered: BATCH NUMBER.", "error");
-            return;
-        }
-
-        if (!currentGeneratedRows) {
-            document.getElementById('generateBtn').click();
-            if (!currentGeneratedRows) return; 
-        }
-
-        const existingDataJSON = localStorage.getItem(STORAGE_PREFIX + batchNo);
-        const isUpdate = existingDataJSON !== null;
-        
-        const timestamp = isUpdate ? (JSON.parse(existingDataJSON).saveTimestamp || Date.now()) : Date.now();
-
-        if (isUpdate && (Date.now() - timestamp > 30 * 60 * 1000)) {
-            showMsg("FRM-41000", "Record locked by system constraints. 30 minutes have passed since initial save.", "error");
-            setFormState(true);
-            return;
-        }
-
-        const batchData = {
-            prodName: document.getElementById('prodName').value.trim(),
-            batchNo: batchNo,
-            prodType: document.getElementById('prodType').value,
-            boothStart: document.getElementById('boothStart').value,
-            boothEnd: document.getElementById('boothEnd').value,
-            dispStart: document.getElementById('dispStart').value,
-            dispEnd: document.getElementById('dispEnd').value,
-            dispStart2: document.getElementById('dispStart2').value,
-            dispEnd2: document.getElementById('dispEnd2').value,
-            roomCleanStart: document.getElementById('roomCleanStart').value,
-            boothOperator: document.getElementById('boothOperator').value.trim(),
-            dispOperator: document.getElementById('dispOperator').value.trim(),
-            stagingOperator: document.getElementById('stagingOperator').value.trim(),
-            cleanerRoom: document.getElementById('cleanerRoom').value.trim(),
-            cleanerBooth: document.getElementById('cleanerBooth').value.trim(),
-            cleanerEth: document.getElementById('cleanerEth').value.trim(),
-            logRows: currentGeneratedRows,
-            saveTimestamp: timestamp
+        window.scrollToResult = () => {
+            const res = document.getElementById('resultArea');
+            if(res.style.display === 'block') res.scrollIntoView({ behavior: 'smooth' });
+            else showToast("Generate or Load a log first.");
         };
 
-        localStorage.setItem(STORAGE_PREFIX + batchNo, JSON.stringify(batchData));
-        loadDatalist();
-        
-        if (isUpdate) {
-            showMsg("Transaction Complete", `FRM-40400: Record Updated successfully. (Batch: ${batchNo})`, "success");
-        } else {
-            showMsg("Transaction Complete", `FRM-40400: 1 record applied and saved. (Batch: ${batchNo})`, "success");
-        }
-    };
+        let currentGeneratedRows = null;
+        let activeMaterialInput = null;
+        const STORAGE_PREFIX = "ORA_BATCH_";
 
-    // --- EXECUTE PROGRAM (GENERATE) ---
-    document.getElementById('generateBtn').addEventListener('click', () => {
-        let hasError = false;
+        window.showAboutInfo = () => {
+            showMsg("About System", "<b>KMF Dispensing Manager Mobile</b><br><br>Version 2.0.1<br>Optimized for Mobile/Touch UI & A4 Print.<br>All Rights Reserved Kashor Multiflex Facility (KMF).<br>Powered by Ratul Hasan.", "success");
+        };
+
+        const alertBox = document.getElementById('customAlert');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertMsg = document.getElementById('alertMsg');
         
-        document.querySelectorAll('.req-field').forEach(el => {
-            if (!el.value.trim() && el.style.display !== 'none') { // only check visible required fields
-                el.classList.add('error-field'); hasError = true; 
+        window.showMsg = (title, msg, type="error") => {
+            alertTitle.innerText = title; alertMsg.innerHTML = msg; 
+            alertTitle.style.color = (type === "success") ? "#059669" : "var(--error-text)";
+            alertBox.style.display = 'flex';
+        };
+        document.getElementById('closeAlertBtn').addEventListener('click', () => alertBox.style.display = 'none');
+
+        const setFormState = (isLocked) => {
+            document.querySelectorAll('.req-field').forEach(el => el.disabled = isLocked);
+            document.getElementById('mat1').disabled = isLocked;
+            document.getElementById('mat2').disabled = isLocked;
+            document.getElementById('generateBtn').disabled = isLocked;
+            const lockStatus = document.getElementById('lockStatus');
+            if(isLocked) {
+                lockStatus.innerText = "🔴 Status: READ-ONLY (Locked)"; lockStatus.style.color = "var(--error-text)"; lockStatus.style.fontWeight = "bold";
+            } else {
+                lockStatus.innerText = "🟢 Status: Editable"; lockStatus.style.color = "var(--text-muted)"; lockStatus.style.fontWeight = "normal";
             }
+        };
+
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('input', function() { this.classList.remove('error-field'); currentGeneratedRows = null; });
+        });
+        document.getElementById('batchNo').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+        document.getElementById('prodType').addEventListener('change', function() {
+            const isMDI2 = this.value === 'MDI_2';
+            document.querySelectorAll('.mdi-field').forEach(el => {
+                el.style.display = isMDI2 ? 'flex' : 'none';
+                const input = el.querySelector('input');
+                if (isMDI2) { if(input.id !== 'mat2') input.classList.add('req-field'); }
+                else { if(input.id !== 'mat2') input.classList.remove('req-field'); input.value = ''; }
+            });
+            currentGeneratedRows = null;
         });
 
-        if (hasError) return showMsg("Validation Error", "FRM-40202: All required fields must be entered.", "error");
+        const matModal = document.getElementById('materialModal');
+        const othersChk = document.getElementById('othersChk');
+        const othersText = document.getElementById('othersText');
 
-        const prodName = document.getElementById('prodName').value.trim();
-        const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
-        const type = document.getElementById('prodType').value;
-        const boothStart = new Date(document.getElementById('boothStart').value);
-        const boothEnd = new Date(document.getElementById('boothEnd').value);
-        const dispStart = new Date(document.getElementById('dispStart').value);
-        const dispEnd = new Date(document.getElementById('dispEnd').value);
-        
-        // Manual Room Start
-        const roomStart = new Date(document.getElementById('roomCleanStart').value);
+        othersChk.addEventListener('change', () => {
+            othersText.style.display = othersChk.checked ? 'block' : 'none';
+            if(othersChk.checked) othersText.focus();
+        });
 
-        const boothOp = document.getElementById('boothOperator').value.trim();
-        const dispOp = document.getElementById('dispOperator').value.trim();
-        const stagingOp = document.getElementById('stagingOperator').value.trim();
-        const cleanerR = document.getElementById('cleanerRoom').value.trim();
-        const cleanerB = document.getElementById('cleanerBooth').value.trim();
-        const cleanerE = document.getElementById('cleanerEth').value.trim();
-
-        document.getElementById("hdrProdName").innerText = prodName;
-        document.getElementById("hdrBatchNo").innerText = batchNo;
-        document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(boothStart);
-
-        // Build Production Rows
-        const rawRows = [
-            { task: "PRODUCTION PHASE", isSection: true },
-            { task: "Booth Operation", startStr: formatTime(boothStart), endStr: formatTime(boothEnd), by: boothOp },
-            { task: "Dispensing Operation 1", startStr: formatTime(dispStart), endStr: formatTime(dispEnd), by: dispOp }
-        ];
-
-        // MDI Logic (Double Dispense, Double Staging)
-        if (type === 'MDI') {
-            const dispStart2 = new Date(document.getElementById('dispStart2').value);
-            const dispEnd2 = new Date(document.getElementById('dispEnd2').value);
+        window.openMaterialModal = (num) => {
+            if(document.getElementById(`mat${num}`).disabled) return;
+            activeMaterialInput = num;
+            const currentVal = document.getElementById(`mat${num}`).value;
             
-            rawRows.push({ task: "Dispensing Operation 2", startStr: formatTime(dispStart2), endStr: formatTime(dispEnd2), by: dispOp });
-            
-            let stagingStart1 = addMins(dispEnd, 2);
-            let stagingStart2 = addMins(dispEnd2, 2);
-            
-            rawRows.push({ task: "Staging 1 (MDI)", startStr: formatTime(stagingStart1), endStr: null, by: stagingOp });
-            rawRows.push({ task: "Staging 2 (MDI)", startStr: formatTime(stagingStart2), endStr: null, by: stagingOp });
-        } else {
-            // DPI Logic
-            let stagingStart = addMins(dispEnd, 4);
-            rawRows.push({ task: "Staging (DPI)", startStr: formatTime(stagingStart), endStr: null, by: stagingOp });
-        }
-
-        // Full Cleaning Algorithm (Based on Manual roomStart)
-        const roomEnd = addMins(roomStart, rand(76, 85));
-        const bCleanStart = addMins(roomStart, rand(4, 8));
-        const bCleanEnd = addMins(bCleanStart, rand(40, 45));
-        const bal30S = addMins(bCleanStart, rand(5, 7));
-        const bal30E = addMins(bal30S, rand(7, 9));
-        const bal31S = addMins(bal30E, 1);
-        const bal31E = addMins(bal31S, rand(7, 9));
-        const ethStart = addMins(bCleanStart, rand(4, 6));
-        const ethEnd = addMins(ethStart, rand(13, 16));
-        const pb18S = addMins(ethEnd, 1);
-        const pb18E = addMins(pb18S, rand(9, 10));
-        const pb19S = addMins(pb18E, 1);
-        const pb19E = addMins(pb19S, rand(11, 12));
-        const accStart = addMins(pb19E, 3);
-        const accEnd = addMins(accStart, rand(4, 8));
-        const ppeStart = addMins(bCleanEnd, rand(2, 4));
-        const ppeEnd = addMins(ppeStart, rand(14, 17));
-
-        rawRows.push(
-            { task: "FULL CLEANING PHASE", isSection: true },
-            { task: "Room Full Cleaning", startStr: formatTime(roomStart), endStr: formatTime(roomEnd), by: cleanerR },
-            { task: "Booth Full Cleaning", startStr: formatTime(bCleanStart), endStr: formatTime(bCleanEnd), by: cleanerB },
-            { task: "30 Balance Cleaning", startStr: formatTime(bal30S), endStr: formatTime(bal30E), by: cleanerB },
-            { task: "31 Balance Cleaning", startStr: formatTime(bal31S), endStr: formatTime(bal31E), by: cleanerB },
-            { task: "Ethanol Filter Cleaning", startStr: formatTime(ethStart), endStr: formatTime(ethEnd), by: cleanerE },
-            { task: "18 Passbox Cleaning", startStr: formatTime(pb18S), endStr: formatTime(pb18E), by: cleanerE },
-            { task: "19 Passbox Cleaning", startStr: formatTime(pb19S), endStr: formatTime(pb19E), by: cleanerE },
-            { task: "Accessories Cleaning", startStr: formatTime(accStart), endStr: formatTime(accEnd), by: cleanerE },
-            { task: "PPE Cleaning", startStr: formatTime(ppeStart), endStr: formatTime(ppeEnd), by: cleanerB }
-        );
-
-        currentGeneratedRows = rawRows;
-        renderTable(currentGeneratedRows);
-        
-        scrollToResult();
-        setStatus("Program executed successfully. Output generated.");
-    });
-
-
-    // --- Image / Export / Send Logic ---
-    const getCanvas = async () => {
-        const captureDiv = document.getElementById("captureArea");
-        const headerInfo = document.getElementById("pngHeader");
-        
-        headerInfo.style.display = "block";
-        captureDiv.style.padding = "15px";
-        captureDiv.style.border = "1px solid #000";
-
-        const canvas = await html2canvas(captureDiv, { scale: 3, backgroundColor: "#ffffff" });
-        
-        headerInfo.style.display = "none";
-        captureDiv.style.padding = "0";
-        captureDiv.style.border = "none";
-        
-        return canvas;
-    };
-
-    window.triggerDownload = async function() {
-        setStatus("Exporting image...");
-        const batchNo = document.getElementById('batchNo').value.trim() || "EXPORT";
-        const canvas = await getCanvas();
-        let link = document.createElement('a');
-        link.download = `KMF_LOG_${batchNo}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        setStatus("Export complete.");
-    };
-
-    window.triggerShare = async function() {
-        if (!navigator.share) return alert("Sharing API not supported on this browser.");
-        const batchNo = document.getElementById('batchNo').value.trim() || "DATA";
-        try {
-            setStatus("Preparing file for share...");
-            const canvas = await getCanvas();
-            canvas.toBlob(async (blob) => {
-                const file = new File([blob], `KMF_LOG_${batchNo}.png`, { type: 'image/png' });
-                await navigator.share({
-                    title: `Oracle KMF Log - ${batchNo}`,
-                    files: [file]
-                });
-                setStatus("Share complete.");
-            }, 'image/png');
-        } catch (err) {
-            setStatus("Share cancelled or failed.");
-        }
-    };
-
-    window.triggerDataSend = async function() {
-        if (!navigator.share) return alert("Sharing API not supported on this browser.");
-        
-        const batchNo = document.getElementById('batchNo').value.trim() || "N/A";
-        const prodName = document.getElementById('prodName').value.trim() || "N/A";
-        
-        let textData = `*KMF Log Data*\nProduct: ${prodName}\nBatch: ${batchNo}\n\n`;
-        
-        if(currentGeneratedRows) {
-            currentGeneratedRows.forEach(r => {
-                if (r.isSection) {
-                    textData += `\n🔹 *${r.task}* 🔹\n`;
+            document.querySelectorAll('.mat-chk').forEach(chk => {
+                if(chk.value === "Others") {
+                    let isOthers = false;
+                    const defaultItems = ["Aluminum canister", "Metered valve", "Capsule shell", "Excipients", "API"];
+                    const currentArray = currentVal.split(', ').filter(v => v);
+                    const customItems = currentArray.filter(item => !defaultItems.includes(item));
+                    
+                    if(customItems.length > 0) {
+                        chk.checked = true;
+                        othersText.style.display = 'block';
+                        othersText.value = customItems.join(', ');
+                    } else {
+                        chk.checked = false;
+                        othersText.style.display = 'none';
+                        othersText.value = '';
+                    }
                 } else {
-                    textData += `▪️ ${r.task} | ${r.startStr} to ${r.endStr || '-'} | By: ${r.by}\n`;
+                    chk.checked = currentVal.includes(chk.value);
                 }
             });
-            try {
-                await navigator.share({
-                    title: `KMF Data - ${batchNo}`,
-                    text: textData
-                });
-            } catch (err) {
-                console.log('Error sending text:', err);
-            }
-        } else {
-            alert("Generate Master Log first.");
-        }
-    };
+            matModal.style.display = 'flex';
+        };
 
+        window.closeMaterialModal = () => { matModal.style.display = 'none'; activeMaterialInput = null; };
+
+        window.saveMaterialSelection = () => {
+            let selected = [];
+            document.querySelectorAll('.mat-chk').forEach(chk => {
+                if(chk.checked) {
+                    if(chk.value === "Others") {
+                        if(othersText.value.trim()) selected.push(othersText.value.trim());
+                    } else {
+                        selected.push(chk.value);
+                    }
+                }
+            });
+            if(activeMaterialInput) {
+                document.getElementById(`mat${activeMaterialInput}`).value = selected.join(', ');
+                currentGeneratedRows = null; 
+            }
+            closeMaterialModal();
+        };
+
+        const loadDatalist = () => {
+            const datalist = document.getElementById('batchList');
+            datalist.innerHTML = '';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(STORAGE_PREFIX)) {
+                    const option = document.createElement('option');
+                    option.value = key.replace(STORAGE_PREFIX, '');
+                    datalist.appendChild(option);
+                }
+            }
+        };
+        loadDatalist();
+
+        window.openInputModal = (type) => {
+            window.modalActionType = type;
+            const title = document.getElementById('inputModalTitle');
+            const heading = document.getElementById('inputModalHeading');
+            const input = document.getElementById('modalBatchInput');
+            input.value = ''; 
+            if(type === 'search') { title.innerText = 'Search Database'; heading.innerText = 'Search / Load Record'; }
+            else { title.innerText = 'Delete Record'; heading.innerText = 'Warning: Delete Action'; }
+            document.getElementById('inputModal').style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
+        };
+        window.closeInputModal = () => document.getElementById('inputModal').style.display = 'none';
+
+        window.submitModal = () => {
+            const batchVal = document.getElementById('modalBatchInput').value.trim().toUpperCase();
+            if(!batchVal) return;
+            if(window.modalActionType === 'search') executeSearchLoad(batchVal);
+            else executeDelete(batchVal);
+            closeInputModal();
+        };
+
+        const executeSearchLoad = (searchVal) => {
+            const data = JSON.parse(localStorage.getItem(STORAGE_PREFIX + searchVal));
+            if(data) {
+                document.getElementById('prodName').value = data.prodName || "";
+                document.getElementById('batchNo').value = data.batchNo || "";
+                
+                const prodDropdown = document.getElementById('prodType');
+                prodDropdown.value = data.prodType || "DPI";
+                prodDropdown.dispatchEvent(new Event('change'));
+                
+                document.getElementById('boothStart').value = data.boothStart || "";
+                document.getElementById('boothEnd').value = data.boothEnd || "";
+                document.getElementById('dispStart').value = data.dispStart || "";
+                document.getElementById('dispEnd').value = data.dispEnd || "";
+                document.getElementById('dispStart2').value = data.dispStart2 || "";
+                document.getElementById('dispEnd2').value = data.dispEnd2 || "";
+                document.getElementById('roomCleanStart').value = data.roomCleanStart || "";
+                
+                document.getElementById('mat1').value = data.mat1 || "";
+                document.getElementById('mat2').value = data.mat2 || "";
+
+                document.getElementById('boothOperator').value = data.boothOperator || "";
+                document.getElementById('dispOperator').value = data.dispOperator || "";
+                document.getElementById('stagingOperator').value = data.stagingOperator || "";
+                document.getElementById('cleanerRoom').value = data.cleanerRoom || "";
+                document.getElementById('cleanerBooth').value = data.cleanerBooth || "";
+                document.getElementById('cleanerEth').value = data.cleanerEth || "";
+                
+                document.getElementById("hdrProdName").innerText = data.prodName || "-";
+                document.getElementById("hdrBatchNo").innerText = data.batchNo || "-";
+                if(data.boothStart) document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(new Date(data.boothStart));
+
+                if (data.logRows) {
+                    currentGeneratedRows = data.logRows;
+                    renderTable(data.logRows);
+                } else {
+                    document.getElementById('generateBtn').click();
+                }
+
+                const timestamp = data.saveTimestamp || 0; 
+                const ageMs = Date.now() - timestamp;
+                if (ageMs > 30 * 60 * 1000) { setFormState(true); setStatus("Record retrieved. Status: LOCKED."); }
+                else { setFormState(false); setStatus(`Record retrieved. Editable.`); }
+            } else showMsg("Not Found", "No records found for this batch number.", "error");
+        };
+
+        const executeDelete = (searchVal) => {
+            if(localStorage.getItem(STORAGE_PREFIX + searchVal)) {
+                if(confirm(`Are you sure you want to delete ${searchVal}?`)) { 
+                    localStorage.removeItem(STORAGE_PREFIX + searchVal); 
+                    loadDatalist(); setStatus("Record deleted."); 
+                }
+            } else showToast("Batch not found.");
+        };
+
+        const renderTable = (rowsData) => {
+            const tbody = document.querySelector("#logTable tbody");
+            tbody.innerHTML = ""; 
+            rowsData.forEach(r => {
+                const tr = document.createElement("tr");
+                if (r.isSection) tr.innerHTML = `<td colspan="4" class="section-row">${r.task}</td>`;
+                else tr.innerHTML = `<td>${r.task}</td><td>${r.startStr || '-'}</td><td>${r.endStr || '-'}</td><td>${r.by}</td>`;
+                tbody.appendChild(tr);
+            });
+            document.getElementById("resultArea").style.display = "block";
+        };
+
+        window.appSaveRecord = () => {
+            const batchNo = document.getElementById('batchNo').value.trim().toUpperCase();
+            if (!batchNo) return showMsg("Validation Error", "Please enter a Batch Number first.", "error");
+            if (!currentGeneratedRows) { document.getElementById('generateBtn').click(); if (!currentGeneratedRows) return; }
+            const existing = localStorage.getItem(STORAGE_PREFIX + batchNo);
+            const timestamp = existing ? JSON.parse(existing).saveTimestamp : Date.now();
+            const batchData = {
+                prodName: document.getElementById('prodName').value, batchNo, prodType: document.getElementById('prodType').value,
+                boothStart: document.getElementById('boothStart').value, boothEnd: document.getElementById('boothEnd').value,
+                dispStart: document.getElementById('dispStart').value, dispEnd: document.getElementById('dispEnd').value,
+                dispStart2: document.getElementById('dispStart2').value, dispEnd2: document.getElementById('dispEnd2').value,
+                roomCleanStart: document.getElementById('roomCleanStart').value, 
+                mat1: document.getElementById('mat1').value, mat2: document.getElementById('mat2').value,
+                boothOperator: document.getElementById('boothOperator').value, dispOperator: document.getElementById('dispOperator').value, 
+                stagingOperator: document.getElementById('stagingOperator').value, cleanerRoom: document.getElementById('cleanerRoom').value, 
+                cleanerBooth: document.getElementById('cleanerBooth').value, cleanerEth: document.getElementById('cleanerEth').value, 
+                logRows: currentGeneratedRows, saveTimestamp: timestamp
+            };
+            localStorage.setItem(STORAGE_PREFIX + batchNo, JSON.stringify(batchData));
+            loadDatalist(); setStatus("Record saved successfully.");
+        };
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            let hasError = false;
+            document.querySelectorAll('.req-field').forEach(el => { 
+                if (!el.value.trim() && el.style.display !== 'none' && !el.disabled) { 
+                    el.classList.add('error-field'); hasError = true; 
+                } 
+            });
+            if (hasError) return showMsg("Missing Info", "Please fill out all required highlighted fields.", "error");
+
+            const typeRaw = document.getElementById('prodType').value;
+            const bS = new Date(document.getElementById('boothStart').value);
+            const bE = new Date(document.getElementById('boothEnd').value);
+            const d1S = new Date(document.getElementById('dispStart').value);
+            const d1E = new Date(document.getElementById('dispEnd').value);
+            const rS = new Date(document.getElementById('roomCleanStart').value);
+            
+            const mat1Val = document.getElementById('mat1').value.trim();
+            const mat2Val = document.getElementById('mat2').value.trim();
+            const strM1 = mat1Val ? ` [${mat1Val}]` : "";
+            const strM2 = mat2Val ? ` [${mat2Val}]` : "";
+
+            const rawRows = [
+                { task: "PRODUCTION PHASE", isSection: true },
+                { task: "Booth Operation", startStr: formatTime(bS), endStr: formatTime(bE), by: document.getElementById('boothOperator').value }
+            ];
+
+            if (typeRaw === 'MDI_2') {
+                const d2S = new Date(document.getElementById('dispStart2').value);
+                const d2E = new Date(document.getElementById('dispEnd2').value);
+                rawRows.push({ task: "Dispensing Operation 1", startStr: formatTime(d1S), endStr: formatTime(d1E), by: document.getElementById('dispOperator').value });
+                rawRows.push({ task: "Dispensing Operation 2", startStr: formatTime(d2S), endStr: formatTime(d2E), by: document.getElementById('dispOperator').value });
+                rawRows.push({ task: `Staging 1 (MDI)${strM1}`, startStr: formatTime(addMins(d1E, 2)), endStr: null, by: document.getElementById('stagingOperator').value });
+                rawRows.push({ task: `Staging 2 (MDI)${strM2}`, startStr: formatTime(addMins(d2E, 2)), endStr: null, by: document.getElementById('stagingOperator').value });
+            } else {
+                rawRows.push({ task: "Dispensing Operation", startStr: formatTime(d1S), endStr: formatTime(d1E), by: document.getElementById('dispOperator').value });
+                let sT = typeRaw.startsWith('MDI') ? 2 : 4;
+                rawRows.push({ task: `Staging (${typeRaw.split('_')[0]})${strM1}`, startStr: formatTime(addMins(d1E, sT)), endStr: null, by: document.getElementById('stagingOperator').value });
+            }
+
+            // Full Clean Logic
+            const bCS = addMins(rS, rand(4, 8)); const bCE = addMins(bCS, rand(40, 45));
+            const bal30S = addMins(bCS, rand(5, 7)); const bal30E = addMins(bal30S, rand(7, 9));
+            const bal31S = addMins(bal30E, 1); const bal31E = addMins(bal31S, rand(7, 9));
+            const ethStart = addMins(bCS, rand(4, 6)); const ethEnd = addMins(ethStart, rand(13, 16));
+            const pb18S = addMins(ethEnd, 1); const pb18E = addMins(pb18S, rand(9, 10));
+            const pb19S = addMins(pb18E, 1); const pb19E = addMins(pb19S, rand(11, 12));
+            
+            rawRows.push(
+                { task: "FULL CLEANING PHASE", isSection: true },
+                { task: "Room Full Cleaning", startStr: formatTime(rS), endStr: formatTime(addMins(rS, rand(76, 85))), by: document.getElementById('cleanerRoom').value },
+                { task: "Booth Full Cleaning", startStr: formatTime(bCS), endStr: formatTime(bCE), by: document.getElementById('cleanerBooth').value },
+                { task: "30 Balance Cleaning", startStr: formatTime(bal30S), endStr: formatTime(bal30E), by: document.getElementById('cleanerBooth').value },
+                { task: "31 Balance Cleaning", startStr: formatTime(bal31S), endStr: formatTime(bal31E), by: document.getElementById('cleanerBooth').value },
+                { task: "Ethanol Filter Cleaning", startStr: formatTime(ethStart), endStr: formatTime(ethEnd), by: document.getElementById('cleanerEth').value },
+                { task: "18 Passbox Cleaning", startStr: formatTime(pb18S), endStr: formatTime(pb18E), by: document.getElementById('cleanerEth').value },
+                { task: "19 Passbox Cleaning", startStr: formatTime(pb19S), endStr: formatTime(pb19E), by: document.getElementById('cleanerEth').value },
+                { task: "Accessories Cleaning", startStr: formatTime(addMins(pb19E, 3)), endStr: formatTime(addMins(pb19E, 3 + rand(4, 8))), by: document.getElementById('cleanerEth').value },
+                { task: "PPE Cleaning", startStr: formatTime(addMins(bCE, 2)), endStr: formatTime(addMins(bCE, 2 + rand(14, 17))), by: document.getElementById('cleanerBooth').value }
+            );
+
+            currentGeneratedRows = rawRows; 
+            
+            document.getElementById("hdrProdName").innerText = document.getElementById('prodName').value || "-";
+            document.getElementById("hdrBatchNo").innerText = document.getElementById('batchNo').value || "-";
+            document.getElementById("hdrDate").innerText = "Date: " + formatDatePharma(bS);
+            
+            renderTable(rawRows); 
+            window.scrollToResult();
+        });
+
+        // Export/Image Logic
+        const getCanvas = async () => {
+            const captureDiv = document.getElementById("captureArea");
+            
+            // Temporary apply strict A4 properties to ensure perfect export
+            const origMaxWidth = captureDiv.style.maxWidth;
+            const origWidth = captureDiv.style.width;
+            const origPadding = captureDiv.style.padding;
+
+            captureDiv.style.maxWidth = "794px";
+            captureDiv.style.width = "794px";
+            captureDiv.style.padding = "40px";
+
+            const canvas = await html2canvas(captureDiv, { scale: 2, backgroundColor: "#ffffff" });
+
+            // Revert strict A4 properties
+            captureDiv.style.maxWidth = origMaxWidth;
+            captureDiv.style.width = origWidth;
+            captureDiv.style.padding = origPadding;
+
+            return canvas;
+        };
+
+        window.triggerDownload = async () => {
+            const canvas = await getCanvas();
+            let link = document.createElement('a'); link.download = "KMF_LOG.png"; link.href = canvas.toDataURL('image/png'); link.click();
+        };
+
+        document.getElementById('downloadBtn').addEventListener('click', triggerDownload);
+
+        window.triggerShare = async () => {
+            try {
+                const canvas = await getCanvas();
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'KMF_Log.png', { type: 'image/png' });
+                    if (navigator.share) {
+                        await navigator.share({ files: [file], title: 'KMF Log', text: 'Dispensing Master Log attached.' });
+                    } else {
+                        showToast("Sharing not supported on this browser.");
+                    }
+                }, 'image/png');
+            } catch(e) { console.error(e); }
+        };
+        
+        document.getElementById('shareImageBtn').addEventListener('click', triggerShare);
+
+        window.triggerDataSend = async () => {
+            let textData = `*KMF Dispensing Log*\nProduct: ${document.getElementById('prodName').value}\nBatch: ${document.getElementById('batchNo').value}\n\n`;
+            if(currentGeneratedRows) {
+                currentGeneratedRows.forEach(r => { 
+                    if (r.isSection) textData += `\n*${r.task}*\n`; 
+                    else textData += `• ${r.task}: ${r.startStr} - ${r.endStr || 'N/A'}\n`; 
+                });
+                if(navigator.share) {
+                    await navigator.share({ text: textData });
+                } else if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(textData);
+                    showToast("Data copied to clipboard.");
+                }
+            }
+        };
+        
+        document.getElementById('sendDataBtn').addEventListener('click', triggerDataSend);
+    });
 </script>
 
 </body>
